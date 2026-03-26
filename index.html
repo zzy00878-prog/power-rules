@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用戶用電裝置規則 - 極簡沉浸版(完整階層)</title>
+    <title>用戶用電裝置規則 - 專業工程版</title>
     <style>
         body {
             font-family: "Microsoft JhengHei", Arial, sans-serif;
             margin: 0; padding: 0;
             background-color: #f4f7f6;
             color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         
         .content-area {
@@ -17,7 +20,9 @@
             margin: 0 auto;
             padding: 40px 20px 60px 20px; 
             background-color: transparent;
-            min-height: 100vh;
+            flex-grow: 1; 
+            width: 100%;
+            box-sizing: border-box;
         }
 
         h2 { 
@@ -54,7 +59,6 @@
         }
         .toc-chapter-count { font-size: 14px; opacity: 0.9; font-weight: normal; }
 
-        /* 動態 Padding-left 會寫在行內，這裡拿掉固定縮排 */
         .toc-item {
             display: flex; align-items: baseline; padding: 12px 20px; 
             cursor: pointer; transition: 0.2s; border-bottom: 1px solid rgba(0,0,0,0.03);
@@ -76,7 +80,8 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
         .article-title { 
-            font-size: 22px; font-weight: bold; color: #2980b9; 
+            font-size: 24px; /* 加大一點點，讓阿拉伯數字更明顯 */
+            font-weight: bold; color: #2980b9; 
             margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 8px;
         }
         
@@ -88,12 +93,36 @@
         .list-prefix { flex-shrink: 0; white-space: nowrap; }
         .list-content { flex-grow: 1; }
 
+        /* 🛡️ 專業版權與免責宣告頁尾 (Footer) */
+        .legal-footer {
+            text-align: center;
+            padding: 25px 20px;
+            color: #7f8c8d;
+            font-size: 13px;
+            line-height: 1.6;
+            border-top: 1px solid #e0e6ed;
+            background-color: #ebf0f0;
+            margin-top: auto; 
+        }
+        .legal-footer strong { color: #2c3e50; }
+
+        /* 📱 手機版高資訊密度優化 */
         @media (max-width: 768px) {
-            .content-area { padding: 20px 10px 40px 10px; }
-            .book-toc-wrapper { padding: 20px 15px; }
-            .fixed-home-btn { padding: 8px 15px !important; font-size: 14px !important; top: 10px !important; left: 10px !important; }
-            .articles-viewer-body { margin-top: 50px; }
-            h2 { font-size: 20px; }
+            .content-area { padding: 10px 6px 40px 6px; } 
+            .book-toc-wrapper { padding: 15px 10px; }
+            .fixed-home-btn { 
+                padding: 6px 12px !important; 
+                font-size: 13px !important; 
+                top: 8px !important; left: 8px !important; 
+            }
+            .articles-viewer-body { margin-top: 45px; }
+            h2 { font-size: 17px; margin-bottom: 15px; line-height: 1.3; }
+            .article-block { padding: 12px 10px; margin-bottom: 15px; border-left-width: 3px; }
+            .article-title { font-size: 19px; margin-bottom: 8px; padding-bottom: 4px; }
+            .article-text { font-size: 14px; line-height: 1.5; }
+            .sub-flex-list { padding-left: 1.2em; margin-top: 4px; } 
+            .flex-list { margin-top: 4px; }
+            .legal-footer { padding: 15px 10px; font-size: 12px; }
         }
     </style>
 </head>
@@ -102,6 +131,14 @@
     <div class="content-area" id="mainContent">
         <h2 style="color:#e74c3c; text-align:center;">⚠️ 尚未貼上法規資料</h2>
         <p style="text-align:center;">請用記事本打開這個 HTML 檔案，找到 <b>[請把法規全部貼在這裡]</b> 的地方，將幾萬字的法規貼上去並存檔。</p>
+    </div>
+
+    <div class="legal-footer">
+        <strong>© 2026 [你的名字/暱稱]. All Rights Reserved.</strong><br>
+        本網站之程式解析邏輯與介面排版為創作者所有，法規內容引用自政府公開資料。<br>
+        <span style="color: #e74c3c; font-weight: bold;">【免責聲明】</span>本網站提供之法規整理及相關工具僅供初步設計與學術參考，不保證數據之絕對正確性與即時性。<br>
+        實際施工與圖面設計，請務必交由專業電機技師簽證，並以最新版之國家法規及現場狀況為準。<br>
+        開發者不對因使用本網站所導致的任何直接、間接之工程事故或財務損失承擔法律及連帶賠償責任。
     </div>
 
 <script id="rawData" type="text/template">
@@ -12048,17 +12085,36 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
     let ruleBook = [];
     const mainContent = document.getElementById('mainContent');
 
-    // 🏆 終極大腦：支援 章、節、款、目 全階層解析
+    // 🔢 中文數字轉阿拉伯數字翻譯機 (例如：三百六十 -> 360)
+    function zhToNum(zh) {
+        const numMap = {'零':0, '〇':0, '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9};
+        const unitMap = {'十':10, '百':100, '千':1000};
+        let result = 0;
+        let tmp = 0;
+        for (let i = 0; i < zh.length; i++) {
+            let char = zh[i];
+            if (numMap[char] !== undefined) {
+                tmp = numMap[char];
+            } else if (unitMap[char] !== undefined) {
+                if (tmp === 0 && char === '十') tmp = 1; // 處理「十五」這種開頭是十的狀況
+                result += tmp * unitMap[char];
+                tmp = 0;
+            }
+        }
+        result += tmp;
+        return result;
+    }
+
+    // 🏆 終極大腦：支援 章、節、款、目 全階層解析 + 阿拉伯數字轉換
     function parseTextToRuleBook(text) {
         let sections = [];
         let currentSectionObj = null;
         let currentArticle = null;
         
-        // 階層記憶體
         let currentChapterName = "";
         let currentSectionName = "";
-        let currentSubsectionName = ""; // 款
-        let currentItemName = "";       // 目
+        let currentSubsectionName = ""; 
+        let currentItemName = "";       
         let currentBlockType = 'none'; 
 
         const lines = text.split('\n');
@@ -12083,7 +12139,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             if(!rawLine) continue;
             if(rawLine === "[請把法規全部貼在這裡]") continue;
 
-            // 🛡️ 嚴格審查：章
             if(rawLine.match(/^第[一二三四五六七八九十百千]+章[\s　]+[^。]+$/)) {
                 saveArticle();
                 currentChapterName = rawLine;
@@ -12093,7 +12148,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 currentSectionObj = { title: currentChapterName, articles: [] };
                 sections.push(currentSectionObj);
             } 
-            // 🛡️ 嚴格審查：節
             else if (rawLine.match(/^第[一二三四五六七八九十百千]+節[\s　]+[^。]+$/)) {
                 saveArticle();
                 currentSectionName = rawLine;
@@ -12104,7 +12158,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                     sections.push(currentSectionObj);
                 }
             } 
-            // 🛡️ 嚴格審查：款 (Subsection)
             else if (rawLine.match(/^第[一二三四五六七八九十百千]+款[\s　]+[^。]+$/)) {
                 saveArticle();
                 currentSubsectionName = rawLine;
@@ -12117,7 +12170,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 currentSectionObj = { title: combinedTitle, articles: [] };
                 sections.push(currentSectionObj);
             }
-            // 🛡️ 嚴格審查：目 (Item)
             else if (rawLine.match(/^第[一二三四五六七八九十百千]+目[\s　]+[^。]+$/)) {
                 saveArticle();
                 currentItemName = rawLine;
@@ -12130,42 +12182,55 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 currentSectionObj = { title: combinedTitle, articles: [] };
                 sections.push(currentSectionObj);
             }
-            // 🛡️ 嚴格審查：條文
-            else if (rawLine.match(/^第[一二三四五六七八九十百千]+條(?:之[一二三四五六七八九十]+)?$/)) {
-                saveArticle();
-                if(!currentSectionObj) {
-                    currentSectionObj = { title: "未分類條文", articles: [] };
-                    sections.push(currentSectionObj);
-                }
-                currentArticle = { title: rawLine, content: "" };
-                currentBlockType = 'none'; 
-            } 
             else {
-                if(currentArticle) {
-                    let isMainList = rawLine.match(/^[一二三四五六七八九十百]+、/);
-                    let isSubList = rawLine.match(/^\([一二三四五六七八九十百]+\)/) || rawLine.match(/^[0-9]+\./);
+                // 📝 攔截法條標題並轉換為阿拉伯數字
+                let articleMatch = rawLine.match(/^第([一二三四五六七八九十百千零〇]+)條(?:之([一二三四五六七八九十百千零〇]+))?$/);
+                
+                if (articleMatch) {
+                    saveArticle();
+                    if(!currentSectionObj) {
+                        currentSectionObj = { title: "未分類條文", articles: [] };
+                        sections.push(currentSectionObj);
+                    }
                     
-                    if (currentArticle.content === "") {
-                        currentArticle.content = `<div class="normal-text">${rawLine}`;
-                        currentBlockType = 'normal';
-                    } 
-                    else if (isMainList) {
-                        let prefix = isMainList[0];
-                        let content = rawLine.substring(prefix.length);
-                        currentArticle.content += closeCurrentBlock() + `<div class="flex-list"><div class="list-prefix">${prefix}</div><div class="list-content">${content}`;
-                        currentBlockType = 'flex';
+                    // 執行轉換：將中文數字轉為阿拉伯數字
+                    let mainNum = zhToNum(articleMatch[1]);
+                    let newTitle = `第${mainNum}條`;
+                    if (articleMatch[2]) {
+                        let subNum = zhToNum(articleMatch[2]);
+                        newTitle += `之${subNum}`;
                     }
-                    else if (isSubList) {
-                        let prefix = isSubList[0];
-                        let content = rawLine.substring(prefix.length); 
-                        currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list"><div class="list-prefix">${prefix}</div><div class="list-content">${content}`;
-                        currentBlockType = 'flex';
-                    }
-                    else {
-                        if (currentArticle.content.match(/[。：；]$/)) {
-                            currentArticle.content += `<br>${rawLine}`;
-                        } else {
-                            currentArticle.content += rawLine;
+                    
+                    currentArticle = { title: newTitle, content: "" };
+                    currentBlockType = 'none'; 
+                } 
+                else {
+                    if(currentArticle) {
+                        let isMainList = rawLine.match(/^[一二三四五六七八九十百]+、/);
+                        let isSubList = rawLine.match(/^\([一二三四五六七八九十百]+\)/) || rawLine.match(/^[0-9]+\./);
+                        
+                        if (currentArticle.content === "") {
+                            currentArticle.content = `<div class="normal-text">${rawLine}`;
+                            currentBlockType = 'normal';
+                        } 
+                        else if (isMainList) {
+                            let prefix = isMainList[0];
+                            let content = rawLine.substring(prefix.length);
+                            currentArticle.content += closeCurrentBlock() + `<div class="flex-list"><div class="list-prefix">${prefix}</div><div class="list-content">${content}`;
+                            currentBlockType = 'flex';
+                        }
+                        else if (isSubList) {
+                            let prefix = isSubList[0];
+                            let content = rawLine.substring(prefix.length); 
+                            currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list"><div class="list-prefix">${prefix}</div><div class="list-content">${content}`;
+                            currentBlockType = 'flex';
+                        }
+                        else {
+                            if (currentArticle.content.match(/[。：；]$/)) {
+                                currentArticle.content += `<br>${rawLine}`;
+                            } else {
+                                currentArticle.content += rawLine;
+                            }
                         }
                     }
                 }
@@ -12198,7 +12263,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         ruleBook.forEach((section, index) => {
             if(section.articles.length === 0) return;
             
-            // 將長標題切開，例如 [第一章 總則, 第一節 通則, 第一款 一般規定]
             let titleParts = section.title.split(' - ');
             let chapterNameFull = titleParts[0]; 
 
@@ -12222,10 +12286,8 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 `;
             }
 
-            // 取得最後一個階層名稱 (例如：第一款 一般規定)
             let displayTitle = titleParts.length > 1 ? titleParts[titleParts.length - 1] : "本章通則";
             
-            // 決定縮排寬度：節=20px, 款=40px, 目=60px
             let depth = titleParts.length;
             let paddingLeft = 20; 
             let prefixIcon = "";
