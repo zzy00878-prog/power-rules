@@ -57,7 +57,9 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; font-size: 18px; font-weight: bold; color: white;
         }
-        .toc-chapter-count { font-size: 14px; opacity: 0.9; font-weight: normal; }
+        
+        /* 修改章節標題的排版，適應雙行文字 */
+        .toc-chapter-count { font-size: 14px; opacity: 0.95; font-weight: normal; text-align: right; line-height: 1.4; }
 
         .toc-item {
             display: flex; align-items: baseline; padding: 12px 20px; 
@@ -70,7 +72,8 @@
             flex-grow: 1; border-bottom: 2px dotted #aaa;
             margin: 0 15px; position: relative; top: -4px;
         }
-        .toc-page { font-size: 14px; color: #666; white-space: nowrap; }
+        /* 修改節的頁碼字體 */
+        .toc-page { font-size: 14px; color: #666; white-space: nowrap; font-family: monospace; }
         
         .articles-viewer-body { margin-top: 60px; }
 
@@ -80,8 +83,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
         .article-title { 
-            font-size: 24px; /* 加大一點點，讓阿拉伯數字更明顯 */
-            font-weight: bold; color: #2980b9; 
+            font-size: 24px; font-weight: bold; color: #2980b9; 
             margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 8px;
         }
         
@@ -106,14 +108,27 @@
         }
         .legal-footer strong { color: #2c3e50; }
 
+        /* 🧮 右上角計算機按鈕 */
+        .fixed-calc-btn {
+            position: fixed; top: 15px; right: 20px; z-index: 1000;
+            padding: 10px 20px; background-color: #27ae60; border: none; 
+            color: white; border-radius: 5px; cursor: pointer; font-weight: bold; 
+            font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
+            text-decoration: none; display: inline-block;
+        }
+        .fixed-calc-btn:hover { background-color: #219653; transform: translateY(-2px); }
+
         /* 📱 手機版高資訊密度優化 */
         @media (max-width: 768px) {
             .content-area { padding: 10px 6px 40px 6px; } 
             .book-toc-wrapper { padding: 15px 10px; }
             .fixed-home-btn { 
-                padding: 6px 12px !important; 
-                font-size: 13px !important; 
+                padding: 6px 12px !important; font-size: 13px !important; 
                 top: 8px !important; left: 8px !important; 
+            }
+            .fixed-calc-btn { 
+                padding: 6px 12px !important; font-size: 13px !important; 
+                top: 8px !important; right: 8px !important; 
             }
             .articles-viewer-body { margin-top: 45px; }
             h2 { font-size: 17px; margin-bottom: 15px; line-height: 1.3; }
@@ -123,26 +138,13 @@
             .sub-flex-list { padding-left: 1.2em; margin-top: 4px; } 
             .flex-list { margin-top: 4px; }
             .legal-footer { padding: 15px 10px; font-size: 12px; }
-        }
-       /* 🧮 右上角計算機按鈕 */
-        .fixed-calc-btn {
-            position: fixed; top: 15px; right: 20px; z-index: 1000;
-            padding: 10px 20px; background-color: #27ae60; border: none; 
-            color: white; border-radius: 5px; cursor: pointer; font-weight: bold; 
-            font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
-            text-decoration: none; display: inline-block;
-        }
-        .fixed-calc-btn:hover { background-color: #219653; transform: translateY(-2px); }
-        
-        @media (max-width: 768px) {
-            .fixed-calc-btn { padding: 8px 15px !important; font-size: 14px !important; top: 10px !important; right: 10px !important; }
+            .toc-chapter-count { font-size: 12px; }
         }
     </style>
 </head>
 <body>
-    <a href="vd-calc.html" target="_blank" class="fixed-calc-btn">🧮 壓降計算機</a>
 
-    <div class="content-area" id="mainContent">
+    <a href="vd-calc.html" target="_blank" class="fixed-calc-btn">🧮 壓降計算機</a>
 
     <div class="content-area" id="mainContent">
         <h2 style="color:#e74c3c; text-align:center;">⚠️ 尚未貼上法規資料</h2>
@@ -12101,7 +12103,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
     let ruleBook = [];
     const mainContent = document.getElementById('mainContent');
 
-    // 🔢 中文數字轉阿拉伯數字翻譯機 (例如：三百六十 -> 360)
+    // 🔢 中文數字轉阿拉伯數字翻譯機
     function zhToNum(zh) {
         const numMap = {'零':0, '〇':0, '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9};
         const unitMap = {'十':10, '百':100, '千':1000};
@@ -12112,7 +12114,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             if (numMap[char] !== undefined) {
                 tmp = numMap[char];
             } else if (unitMap[char] !== undefined) {
-                if (tmp === 0 && char === '十') tmp = 1; // 處理「十五」這種開頭是十的狀況
+                if (tmp === 0 && char === '十') tmp = 1; 
                 result += tmp * unitMap[char];
                 tmp = 0;
             }
@@ -12199,7 +12201,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 sections.push(currentSectionObj);
             }
             else {
-                // 📝 攔截法條標題並轉換為阿拉伯數字
                 let articleMatch = rawLine.match(/^第([一二三四五六七八九十百千零〇]+)條(?:之([一二三四五六七八九十百千零〇]+))?$/);
                 
                 if (articleMatch) {
@@ -12209,7 +12210,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                         sections.push(currentSectionObj);
                     }
                     
-                    // 執行轉換：將中文數字轉為阿拉伯數字
                     let mainNum = zhToNum(articleMatch[1]);
                     let newTitle = `第${mainNum}條`;
                     if (articleMatch[2]) {
@@ -12289,15 +12289,24 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 currentChapterParsed = chapterNameFull;
                 colorIndex = (colorIndex + 1) % chapterColors.length; 
                 
-                let totalArticlesInChapter = ruleBook
-                    .filter(s => s.title.startsWith(currentChapterParsed))
-                    .reduce((sum, s) => sum + s.articles.length, 0);
+                // 抓取這個大章節底下的所有節，用來計算總條數與起訖條文
+                let chapterSections = ruleBook.filter(s => s.title.startsWith(currentChapterParsed) && s.articles.length > 0);
+                let totalArticlesInChapter = chapterSections.reduce((sum, s) => sum + s.articles.length, 0);
+
+                // 計算該章第一條與最後一條
+                let firstChArt = chapterSections[0].articles[0].title;
+                let lastChSection = chapterSections[chapterSections.length - 1];
+                let lastChArt = lastChSection.articles[lastChSection.articles.length - 1].title;
+                let chRangeText = (firstChArt === lastChArt) ? firstChArt : `${firstChArt} ~ ${lastChArt}`;
 
                 htmlContent += `
                     <div class="toc-chapter-group" style="border: 1px solid ${chapterColors[colorIndex].header};">
                         <div class="toc-chapter-header" style="background-color: ${chapterColors[colorIndex].header};">
                             <div>${currentChapterParsed}</div>
-                            <div class="toc-chapter-count">📑 總計 ${totalArticlesInChapter} 條</div>
+                            <div class="toc-chapter-count">
+                                <div style="font-size: 15px; font-weight: bold;">${chRangeText}</div>
+                                <div style="font-size: 13px; opacity: 0.85;">共 ${totalArticlesInChapter} 條</div>
+                            </div>
                         </div>
                 `;
             }
@@ -12316,11 +12325,16 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 prefixIcon = "&nbsp;&nbsp;↳ ";
             }
 
+            // 計算該節的第一條與最後一條
+            let firstArt = section.articles[0].title;
+            let lastArt = section.articles[section.articles.length - 1].title;
+            let rangeText = (firstArt === lastArt) ? firstArt : `${firstArt} ~ ${lastArt}`;
+
             htmlContent += `
                 <div class="toc-item" style="background-color: ${chapterColors[colorIndex].body}; padding-left: ${paddingLeft}px;" onclick="renderSection(${index})">
                     <div class="toc-title" style="${depth > 2 ? 'color: #555; font-size: 15px;' : ''}">${prefixIcon}${displayTitle}</div>
                     <div class="toc-leader"></div>
-                    <div class="toc-page">(${section.articles.length} 條)</div>
+                    <div class="toc-page">(${rangeText})</div>
                 </div>
             `;
         });
@@ -12357,7 +12371,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         window.scrollTo(0, 0); 
     }
 
-    // 鎖定按鈕樣式
+    // 鎖定按鈕樣式 (回到總目錄)
     const style = document.createElement('style');
     style.innerHTML = `
         .fixed-home-btn {
