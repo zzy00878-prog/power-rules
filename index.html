@@ -53,13 +53,28 @@
             margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden;
         }
         
+        /* 📂 讓大章節標題變成可點擊的按鈕 */
         .toc-chapter-header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; font-size: 18px; font-weight: bold; color: white;
+            cursor: pointer; /* 游標變成手指 */
+            user-select: none; /* 防止連點時反白文字 */
+            transition: 0.2s;
         }
+        .toc-chapter-header:hover { filter: brightness(0.95); }
         
-        /* 修改章節標題的排版，適應雙行文字 */
+        /* 旋轉小箭頭動畫 */
+        .toggle-icon {
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
         .toc-chapter-count { font-size: 14px; opacity: 0.95; font-weight: normal; text-align: right; line-height: 1.4; }
+
+        /* 預設隱藏子目錄 */
+        .toc-chapter-items { display: none; }
 
         .toc-item {
             display: flex; align-items: baseline; padding: 12px 20px; 
@@ -72,7 +87,6 @@
             flex-grow: 1; border-bottom: 2px dotted #aaa;
             margin: 0 15px; position: relative; top: -4px;
         }
-        /* 修改節的頁碼字體 */
         .toc-page { font-size: 14px; color: #666; white-space: nowrap; font-family: monospace; }
         
         .articles-viewer-body { margin-top: 60px; }
@@ -87,7 +101,6 @@
             margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 8px;
         }
         
-        /* 💎 Flexbox 凸排對齊排版 */
         .article-text { line-height: 1.8; text-align: justify; font-size: 17px; }
         .normal-text { display: block; margin-top: 5px; }
         .flex-list { display: flex; margin-top: 8px; }
@@ -95,7 +108,7 @@
         .list-prefix { flex-shrink: 0; white-space: nowrap; }
         .list-content { flex-grow: 1; }
 
-        /* 🛡️ 專業版權與免責宣告頁尾 (Footer) */
+        /* 🛡️ 專業版權與免責宣告頁尾 */
         .legal-footer {
             text-align: center;
             padding: 25px 20px;
@@ -12123,7 +12136,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         return result;
     }
 
-    // 🏆 終極大腦：支援 章、節、款、目 全階層解析 + 阿拉伯數字轉換
+    // 🏆 終極大腦解析器
     function parseTextToRuleBook(text) {
         let sections = [];
         let currentSectionObj = null;
@@ -12265,7 +12278,22 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         { header: '#16a085', body: '#e0f2f1' }  
     ];
 
-    // 📖 渲染多階層總目錄
+    // 📂 點擊章節展開/收合的動畫邏輯
+    window.toggleChapter = function(headerElement) {
+        // 抓取底下包覆所有條目的 div
+        const itemsDiv = headerElement.nextElementSibling;
+        const icon = headerElement.querySelector('.toggle-icon');
+        
+        if (itemsDiv.style.display === 'none' || itemsDiv.style.display === '') {
+            itemsDiv.style.display = 'block'; // 展開
+            icon.style.transform = 'rotate(90deg)'; // 箭頭朝下
+        } else {
+            itemsDiv.style.display = 'none'; // 收合
+            icon.style.transform = 'rotate(0deg)'; // 箭頭朝右
+        }
+    };
+
+    // 📖 渲染多階層總目錄 (加入摺疊功能)
     function renderHomeTOC() {
         let htmlContent = `
             <div class="book-toc-wrapper">
@@ -12284,30 +12312,34 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
 
             if (chapterNameFull !== currentChapterParsed) {
                 if(currentChapterParsed !== "") {
-                    htmlContent += `</div>`; 
+                    // 關閉上一章的 items 區塊和 group 區塊
+                    htmlContent += `</div></div>`; 
                 }
                 currentChapterParsed = chapterNameFull;
                 colorIndex = (colorIndex + 1) % chapterColors.length; 
                 
-                // 抓取這個大章節底下的所有節，用來計算總條數與起訖條文
                 let chapterSections = ruleBook.filter(s => s.title.startsWith(currentChapterParsed) && s.articles.length > 0);
                 let totalArticlesInChapter = chapterSections.reduce((sum, s) => sum + s.articles.length, 0);
 
-                // 計算該章第一條與最後一條
                 let firstChArt = chapterSections[0].articles[0].title;
                 let lastChSection = chapterSections[chapterSections.length - 1];
                 let lastChArt = lastChSection.articles[lastChSection.articles.length - 1].title;
                 let chRangeText = (firstChArt === lastChArt) ? firstChArt : `${firstChArt} ~ ${lastChArt}`;
 
+                // 新增大標題 onclick 觸發 toggleChapter，並加入 items 的外掛 div (預設隱藏)
                 htmlContent += `
                     <div class="toc-chapter-group" style="border: 1px solid ${chapterColors[colorIndex].header};">
-                        <div class="toc-chapter-header" style="background-color: ${chapterColors[colorIndex].header};">
-                            <div>${currentChapterParsed}</div>
+                        <div class="toc-chapter-header" style="background-color: ${chapterColors[colorIndex].header};" onclick="toggleChapter(this)">
+                            <div style="display:flex; align-items:center;">
+                                <span class="toggle-icon">▶</span>
+                                <span>${currentChapterParsed}</span>
+                            </div>
                             <div class="toc-chapter-count">
                                 <div style="font-size: 15px; font-weight: bold;">${chRangeText}</div>
                                 <div style="font-size: 13px; opacity: 0.85;">共 ${totalArticlesInChapter} 條</div>
                             </div>
                         </div>
+                        <div class="toc-chapter-items">
                 `;
             }
 
@@ -12325,7 +12357,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 prefixIcon = "&nbsp;&nbsp;↳ ";
             }
 
-            // 計算該節的第一條與最後一條
             let firstArt = section.articles[0].title;
             let lastArt = section.articles[section.articles.length - 1].title;
             let rangeText = (firstArt === lastArt) ? firstArt : `${firstArt} ~ ${lastArt}`;
@@ -12339,7 +12370,9 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             `;
         });
         
-        if(currentChapterParsed !== "") htmlContent += `</div>`; 
+        if(currentChapterParsed !== "") {
+            htmlContent += `</div></div>`; // 關閉最後一章
+        }
         
         htmlContent += `</div>`;
         mainContent.innerHTML = htmlContent;
