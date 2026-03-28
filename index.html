@@ -113,17 +113,17 @@
             transition: font-size 0.1s ease-out, line-height 0.1s ease-out;
         }
         
-        /* 🛠️ 縮排微調區 (配合較窄的阿拉伯數字) */
+        /* 🛠️ 極致縮排微調區 */
         .normal-text { display: block; margin-top: 5px; }
         
-        /* 第一層：1、 (不需縮排) */
+        /* 第一層：1、 */
         .flex-list { display: flex; margin-top: 8px; }
         
-        /* 第二層：(1) (從原本 2.5em 縮小為 1.8em) */
-        .sub-flex-list { display: flex; margin-top: 8px; padding-left: 1.8em; color: #444; }
+        /* 第二層：(1) (縮小推移距離) */
+        .sub-flex-list { display: flex; margin-top: 8px; padding-left: 1.6em; color: #444; }
         
-        /* 第三層：1. (專屬設定，推移 3.2em，層次分明) */
-        .sub-flex-list-3rd { display: flex; margin-top: 8px; padding-left: 3.2em; color: #555; }
+        /* 第三層：1. (縮小推移距離，讓階梯感更緊湊) */
+        .sub-flex-list-3rd { display: flex; margin-top: 8px; padding-left: 2.8em; color: #555; }
         
         .list-prefix { flex-shrink: 0; white-space: nowrap; font-weight: bold; color: #2980b9; margin-right: 4px; } 
         .list-content { flex-grow: 1; }
@@ -197,9 +197,9 @@
             h2 { font-size: 17px; margin-bottom: 15px; line-height: 1.3; }
             .article-block { padding: 12px 10px; margin-bottom: 15px; border-left-width: 3px; }
             
-            /* 📱 手機版縮排也跟著等比例縮小 */
-            .sub-flex-list { padding-left: 1.2em; margin-top: 4px; } 
-            .sub-flex-list-3rd { padding-left: 2.2em; margin-top: 4px; } 
+            /* 📱 手機/電子紙版，極致壓縮層級距離 */
+            .sub-flex-list { padding-left: 1.0em; margin-top: 4px; } 
+            .sub-flex-list-3rd { padding-left: 1.8em; margin-top: 4px; } 
             
             .flex-list { margin-top: 4px; }
             .legal-footer { padding: 15px 10px 100px 10px; font-size: 12px; }
@@ -12321,20 +12321,22 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                     } 
                     else if (isMainList) {
                         let prefixNum = zhToNum(isMainList[1]);
-                        let content = rawLine.substring(isMainList[0].length);
+                        // ✂️ 裁切掉前方的隱形空白 (trim)
+                        let content = rawLine.substring(isMainList[0].length).trim();
                         currentArticle.content += closeCurrentBlock() + `<div class="flex-list"><div class="list-prefix">${prefixNum}、</div><div class="list-content">${replaceZhNums(content)}`;
                         currentBlockType = 'flex';
                     }
                     else if (isSubListZh) {
                         let prefixNum = zhToNum(isSubListZh[1]);
-                        let content = rawLine.substring(isSubListZh[0].length); 
+                        // ✂️ 裁切掉前方的隱形空白 (trim)
+                        let content = rawLine.substring(isSubListZh[0].length).trim(); 
                         currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list"><div class="list-prefix">(${prefixNum})</div><div class="list-content">${replaceZhNums(content)}`;
                         currentBlockType = 'flex';
                     }
                     else if (isSubListNum) {
                         let prefix = isSubListNum[0];
-                        let content = rawLine.substring(prefix.length); 
-                        // 🌟 套用專屬的第三層縮排樣式 (sub-flex-list-3rd)
+                        // ✂️ 裁切掉前方的隱形空白 (trim)，解決最大痛點！
+                        let content = rawLine.substring(prefix.length).trim(); 
                         currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list-3rd"><div class="list-prefix">${prefix}</div><div class="list-content">${replaceZhNums(content)}`;
                         currentBlockType = 'flex3rd';
                     }
