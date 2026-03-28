@@ -12223,7 +12223,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
     let ruleBook = [];
     const mainContent = document.getElementById('mainContent');
 
-    // 🔢 升級版！解決了「三六○」這類沒有十百千單位的逐字翻譯 Bug
     function zhToNum(zh) {
         const numMap = {'零':0, '〇':0, '○':0, '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9};
         const unitMap = {'十':10, '百':100, '千':1000};
@@ -12233,7 +12232,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             if (unitMap[zh[i]] !== undefined) hasUnit = true;
         }
         
-        // 如果是像「三六○」這樣純數字組合
         if (!hasUnit) {
             let res = "";
             for (let i = 0; i < zh.length; i++) {
@@ -12242,7 +12240,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             return parseInt(res, 10);
         }
         
-        // 如果是像「三百六十」這樣有單位的組合
         let result = 0;
         let tmp = 0;
         for (let i = 0; i < zh.length; i++) {
@@ -12267,7 +12264,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             tempStr = tempStr.split(word).join(`__EX${idx}__`);
         });
 
-        // 增加了 ○ 的辨識
         tempStr = tempStr.replace(/[一二三四五六七八九十百千零〇○]+/g, function(match) {
             return zhToNum(match);
         });
@@ -12279,21 +12275,17 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         return tempStr;
     }
 
-    // 🚀 全自動表格偵測器 (Auto-Link Tables)
-    // 會自動把 "表360～1" 變成按鈕，並對應到檔名 "表360-1.png"
     function autoLinkTables(str) {
         return str.replace(/(?:附)?表\s*(\d+)(?:\s*[～~-－]\s*(\d+))?/g, function(match, p1, p2) {
             let isFuBiao = match.startsWith("附表");
             let prefix = isFuBiao ? "附表" : "表";
             let btnText = p2 ? `📊 ${prefix}${p1}-${p2}` : `📊 ${prefix}${p1}`;
-            // 統一網址檔名格式為：減號、小寫 .png
             let fileName = p2 ? `${prefix}${p1}-${p2}.png` : `${prefix}${p1}.png`;
             
             return `<span class="inline-table-btn" onclick="openTable('${fileName}')">${btnText}</span>`;
         });
     }
 
-    // 🚀 開啟表格，並重置錯誤提示
     window.openTable = function(src) {
         let img = document.getElementById('lightboxImg');
         let hint = document.getElementById('lightboxHint');
@@ -12304,16 +12296,14 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         document.getElementById('tableLightbox').style.display = 'flex';
     };
 
-    // 🚀 找不到圖片時的防呆警告
     window.handleImageError = function(img) {
         img.style.display = 'none';
         let hint = document.getElementById('lightboxHint');
         let targetFileName = img.src.substring(img.src.lastIndexOf('/') + 1);
-        hint.innerHTML = `⚠️ 找不到圖片檔案 <br><br><span style='font-size:14px;'>請確認您有上傳該截圖，且檔名與副檔名必須完全相符：<br>👉 <b>${targetFileName}</b></span>`;
+        hint.innerHTML = `⚠️ 找不到圖片檔案 <br><br><span style='font-size:14px;'>請確認您有上傳該截圖，且檔名必須為：<br>👉 <b>${targetFileName}</b></span>`;
         hint.style.color = '#ff7675';
     };
 
-    // 🚀 關閉表格
     window.closeTable = function(event) {
         if (event.target.id === 'tableLightbox' || event.target.tagName.toLowerCase() === 'button') {
             document.getElementById('tableLightbox').style.display = 'none';
@@ -12341,9 +12331,14 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             return '';
         }
 
+        // 🌟 核心修復點：在寫入區塊的「最後一刻」才整段翻譯
         function saveArticle() {
             if(currentSectionObj && currentArticle && currentArticle.content) {
                 currentArticle.content += closeCurrentBlock(); 
+                
+                // 把已經接合完成的長句子，進行整段翻譯與抓取按鈕
+                currentArticle.content = autoLinkTables(replaceZhNums(currentArticle.content));
+                
                 currentSectionObj.articles.push(currentArticle);
             }
             currentArticle = null;
@@ -12427,36 +12422,34 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                     let isSubListZh = rawLine.match(/^\(([一二三四五六七八九十百]+)\)/);
                     let isSubListNum = rawLine.match(/^[0-9]+\./);
                     
-                    // 👉 直接丟給程式翻譯中文數字，然後自動找表格變按鈕
-                    let processedLine = autoLinkTables(replaceZhNums(rawLine));
-                    
                     if (currentArticle.content === "") {
-                        currentArticle.content = `<div class="normal-text">${processedLine}`;
+                        currentArticle.content = `<div class="normal-text">${rawLine}`;
                         currentBlockType = 'normal';
                     } 
                     else if (isMainList) {
                         let prefixNum = zhToNum(isMainList[1]);
                         let content = rawLine.substring(isMainList[0].length).trim();
-                        currentArticle.content += closeCurrentBlock() + `<div class="flex-list"><div class="list-prefix">${prefixNum}、</div><div class="list-content">${autoLinkTables(replaceZhNums(content))}`;
+                        currentArticle.content += closeCurrentBlock() + `<div class="flex-list"><div class="list-prefix">${prefixNum}、</div><div class="list-content">${content}`;
                         currentBlockType = 'flex';
                     }
                     else if (isSubListZh) {
                         let prefixNum = zhToNum(isSubListZh[1]);
                         let content = rawLine.substring(isSubListZh[0].length).trim(); 
-                        currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list"><div class="list-prefix">(${prefixNum})</div><div class="list-content">${autoLinkTables(replaceZhNums(content))}`;
+                        currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list"><div class="list-prefix">(${prefixNum})</div><div class="list-content">${content}`;
                         currentBlockType = 'flex';
                     }
                     else if (isSubListNum) {
                         let prefix = isSubListNum[0];
                         let content = rawLine.substring(prefix.length).trim(); 
-                        currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list-3rd"><div class="list-prefix">${prefix}</div><div class="list-content">${autoLinkTables(replaceZhNums(content))}`;
+                        currentArticle.content += closeCurrentBlock() + `<div class="sub-flex-list-3rd"><div class="list-prefix">${prefix}</div><div class="list-content">${content}`;
                         currentBlockType = 'flex3rd';
                     }
                     else {
+                        // 🌟 如果是被折斷的句子，會在這裡被「接起來」，等整段接完後才翻譯
                         if (currentArticle.content.match(/[。：；]$/)) {
-                            currentArticle.content += `<br>${processedLine}`;
+                            currentArticle.content += `<br>${rawLine}`;
                         } else {
-                            currentArticle.content += processedLine;
+                            currentArticle.content += rawLine;
                         }
                     }
                 }
