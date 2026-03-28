@@ -121,119 +121,65 @@
         .list-prefix { flex-shrink: 0; white-space: nowrap; font-weight: bold; color: #2980b9; margin-right: 4px; } 
         .list-content { flex-grow: 1; }
 
+        /* 🟦 藍色：圖片表格按鈕 */
         .inline-table-btn {
-            display: inline-flex;
-            align-items: center;
-            background-color: #e8f4fd;
-            color: #2980b9;
-            border: 1px solid #b3d7f2;
-            padding: 0px 10px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            cursor: pointer;
-            margin: 0 4px;
-            vertical-align: baseline;
-            transition: 0.2s;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            line-height: 1.5;
+            display: inline-flex; align-items: center; background-color: #e8f4fd; color: #2980b9;
+            border: 1px solid #b3d7f2; padding: 0px 10px; border-radius: 15px; font-size: 0.9em;
+            cursor: pointer; margin: 0 4px; vertical-align: baseline; transition: 0.2s;
+            font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); line-height: 1.5;
         }
-        .inline-table-btn:hover {
-            background-color: #d0e7f9;
-            transform: translateY(-1px);
-        }
+        .inline-table-btn:hover { background-color: #d0e7f9; transform: translateY(-1px); }
 
+        /* 🟧 橘色：法條交叉參照按鈕 */
+        .inline-article-btn {
+            display: inline-flex; align-items: center; background-color: #fdf2e9; color: #d35400;
+            border: 1px solid #f8c471; padding: 0px 10px; border-radius: 15px; font-size: 0.9em;
+            cursor: pointer; margin: 0 4px; vertical-align: baseline; transition: 0.2s;
+            font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); line-height: 1.5;
+        }
+        .inline-article-btn:hover { background-color: #fae5d3; transform: translateY(-1px); }
+
+        /* 🚀 彈出式燈箱共用底色 */
         .lightbox-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 99999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 99999; display: none;
+            justify-content: center; align-items: center; flex-direction: column;
             backdrop-filter: blur(3px);
         }
-        .lightbox-content {
-            position: relative;
-            max-width: 95%;
-            max-height: 85%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+
+        /* 📸 圖片專用內容框 */
+        .lightbox-content { position: relative; max-width: 95%; max-height: 85%; display: flex; flex-direction: column; align-items: center; }
+        .lightbox-content img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 4px 25px rgba(0,0,0,0.5); background: #fff; object-fit: contain; }
+
+        /* 📖 法條專用內容框 */
+        .lightbox-text-content {
+            position: relative; width: 90%; max-width: 600px; max-height: 80vh;
+            background: #fff; border-radius: 12px; padding: 25px;
+            display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .lightbox-content img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.5);
-            background: #fff;
-            object-fit: contain;
-        }
+        .lightbox-text-header { font-size: 22px; font-weight: bold; color: #d35400; border-bottom: 2px dashed #f8c471; padding-bottom: 10px; margin-bottom: 15px; }
+        .lightbox-text-body { overflow-y: auto; font-size: 16px; line-height: 1.8; color: #333; padding-right: 10px; text-align: justify; }
+
         .lightbox-close {
-            margin-top: 15px;
-            padding: 10px 25px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: 0.2s;
+            margin-top: 15px; padding: 10px 25px; background: #e74c3c; color: white;
+            border: none; border-radius: 20px; font-size: 16px; font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s; align-self: center;
         }
         .lightbox-close:hover { background: #c0392b; }
 
-        .legal-footer {
-            text-align: center;
-            padding: 25px 20px 100px 20px; 
-            color: #7f8c8d;
-            font-size: 13px;
-            line-height: 1.6;
-            border-top: 1px solid #e0e6ed;
-            background-color: #ebf0f0;
-            margin-top: auto; 
-        }
+        .legal-footer { text-align: center; padding: 25px 20px 100px 20px; color: #7f8c8d; font-size: 13px; line-height: 1.6; border-top: 1px solid #e0e6ed; background-color: #ebf0f0; margin-top: auto; }
         .legal-footer strong { color: #2c3e50; }
 
-        .fixed-calc-btn {
-            position: fixed; top: 15px; right: 20px; z-index: 1000;
-            padding: 10px 20px; background-color: #27ae60; border: none; 
-            color: white; border-radius: 5px; cursor: pointer; font-weight: bold; 
-            font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
-            text-decoration: none; display: inline-block;
-        }
+        .fixed-calc-btn { position: fixed; top: 15px; right: 20px; z-index: 1000; padding: 10px 20px; background-color: #27ae60; border: none; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s; text-decoration: none; display: inline-block; }
         .fixed-calc-btn:hover { background-color: #219653; transform: translateY(-2px); }
 
-        .font-slider-panel {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(44, 62, 80, 0.95);
-            backdrop-filter: blur(5px);
-            color: white;
-            padding: 15px 30px; 
-            border-radius: 20px; 
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-        
+        .font-slider-panel { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: rgba(44, 62, 80, 0.95); backdrop-filter: blur(5px); color: white; padding: 15px 30px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; }
         .slider-row { display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; }
         .slider-row input[type="range"] { cursor: pointer; width: 250px; accent-color: #f39c12; }
         .font-icon { font-weight: bold; user-select: none; font-size: 16px; width: 20px; text-align: center; }
 
         @media (max-width: 768px) {
-            :root {
-                --reading-font-size: 15px;
-                --reading-title-size: 20px;
-                --reading-line-height: 1.6; 
-            }
+            :root { --reading-font-size: 15px; --reading-title-size: 20px; --reading-line-height: 1.6; }
             .content-area { padding: 10px 6px 120px 6px; } 
             .book-toc-wrapper { padding: 15px 10px; }
             .fixed-home-btn { padding: 6px 12px !important; font-size: 13px !important; top: 8px !important; left: 8px !important; }
@@ -251,7 +197,10 @@
             .font-slider-panel { bottom: 15px; padding: 12px 20px; gap: 10px; border-radius: 15px; }
             .slider-row input[type="range"] { width: 200px; }
             
-            .inline-table-btn { padding: 0px 8px; font-size: 0.85em; }
+            .inline-table-btn, .inline-article-btn { padding: 0px 8px; font-size: 0.85em; }
+            .lightbox-text-content { padding: 15px; }
+            .lightbox-text-header { font-size: 18px; }
+            .lightbox-text-body { font-size: 15px; }
         }
     </style>
 </head>
@@ -265,8 +214,16 @@
     <div class="lightbox-overlay" id="tableLightbox" onclick="closeTable(event)">
         <div class="lightbox-content">
             <img id="lightboxImg" src="" alt="法規附表" onerror="handleImageError(this)">
-            <div id="lightboxHint" class="table-image-hint" style="color: #bdc3c7; margin-top: 10px;">🔍 點擊背景即可關閉</div>
+            <div id="lightboxHint" style="color: #bdc3c7; margin-top: 10px; font-size: 13px; font-weight: bold;">🔍 點擊背景即可關閉</div>
             <button class="lightbox-close" onclick="closeTable(event)">✖ 返回法規</button>
+        </div>
+    </div>
+
+    <div class="lightbox-overlay" id="articleLightbox" onclick="closeArticleLightbox(event)">
+        <div class="lightbox-text-content">
+            <div class="lightbox-text-header" id="lightboxTextTitle"></div>
+            <div class="lightbox-text-body" id="lightboxTextBody"></div>
+            <button class="lightbox-close" style="margin-top: 20px;" onclick="closeArticleLightbox(event)">✖ 關閉並返回</button>
         </div>
     </div>
 
@@ -12281,11 +12238,20 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             let prefix = isFuBiao ? "附表" : "表";
             let btnText = p2 ? `📊 ${prefix}${p1}-${p2}` : `📊 ${prefix}${p1}`;
             let fileName = p2 ? `${prefix}${p1}-${p2}.png` : `${prefix}${p1}.png`;
-            
             return `<span class="inline-table-btn" onclick="openTable('${fileName}')">${btnText}</span>`;
         });
     }
 
+    // 🚀 法條交叉參照功能：掃描內文中的「第XXX條」變成橘色按鈕
+    function autoLinkArticles(str) {
+        return str.replace(/第\s*(\d+)\s*條(?:之\s*(\d+))?/g, function(match, mainNum, subNum) {
+            let targetTitle = `第${mainNum}條`;
+            if (subNum) targetTitle += `之${subNum}`;
+            return `<span class="inline-article-btn" onclick="openArticlePopup('${targetTitle}')">📖 ${targetTitle}</span>`;
+        });
+    }
+
+    // 📸 開啟與關閉圖片燈箱
     window.openTable = function(src) {
         let img = document.getElementById('lightboxImg');
         let hint = document.getElementById('lightboxHint');
@@ -12295,7 +12261,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         hint.style.color = '#bdc3c7';
         document.getElementById('tableLightbox').style.display = 'flex';
     };
-
     window.handleImageError = function(img) {
         img.style.display = 'none';
         let hint = document.getElementById('lightboxHint');
@@ -12303,11 +12268,41 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         hint.innerHTML = `⚠️ 找不到圖片檔案 <br><br><span style='font-size:14px;'>請確認您有上傳該截圖，且檔名必須為：<br>👉 <b>${targetFileName}</b></span>`;
         hint.style.color = '#ff7675';
     };
-
     window.closeTable = function(event) {
         if (event.target.id === 'tableLightbox' || event.target.tagName.toLowerCase() === 'button') {
             document.getElementById('tableLightbox').style.display = 'none';
             document.getElementById('lightboxImg').src = '';
+        }
+    };
+
+    // 📖 開啟與關閉法條參照燈箱
+    window.openArticlePopup = function(title) {
+        let found = false;
+        let contentHtml = "";
+        
+        // 去大腦 (ruleBook) 裡面翻找對應的條文
+        for(let sec of ruleBook) {
+            for(let art of sec.articles) {
+                if (art.title === title) {
+                    contentHtml = art.content;
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+
+        if (found) {
+            document.getElementById('lightboxTextTitle').innerText = title;
+            document.getElementById('lightboxTextBody').innerHTML = contentHtml;
+            document.getElementById('articleLightbox').style.display = 'flex';
+        } else {
+            alert('⚠️ 找不到 ' + title + ' 的內容！可能是法規中尚無此條文。');
+        }
+    };
+    window.closeArticleLightbox = function(event) {
+        if (event.target.id === 'articleLightbox' || event.target.tagName.toLowerCase() === 'button') {
+            document.getElementById('articleLightbox').style.display = 'none';
         }
     };
 
@@ -12331,13 +12326,12 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             return '';
         }
 
-        // 🌟 核心修復點：在寫入區塊的「最後一刻」才整段翻譯
         function saveArticle() {
             if(currentSectionObj && currentArticle && currentArticle.content) {
                 currentArticle.content += closeCurrentBlock(); 
                 
-                // 把已經接合完成的長句子，進行整段翻譯與抓取按鈕
-                currentArticle.content = autoLinkTables(replaceZhNums(currentArticle.content));
+                // 🌟 所有拼接完成的段落，最後一併通過「中文變數字」、「掃描表格」、「掃描法條」三大引擎
+                currentArticle.content = autoLinkArticles(autoLinkTables(replaceZhNums(currentArticle.content)));
                 
                 currentSectionObj.articles.push(currentArticle);
             }
@@ -12445,7 +12439,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                         currentBlockType = 'flex3rd';
                     }
                     else {
-                        // 🌟 如果是被折斷的句子，會在這裡被「接起來」，等整段接完後才翻譯
                         if (currentArticle.content.match(/[。：；]$/)) {
                             currentArticle.content += `<br>${rawLine}`;
                         } else {
