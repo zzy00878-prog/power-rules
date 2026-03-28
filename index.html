@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用戶用電裝置規則 - 專業工程版</title>
     <style>
+        /* 🎚️ 變更：改為行距 (Line Height) 的 CSS 變數 */
+        :root {
+            --reading-font-size: 17px;
+            --reading-title-size: 24px;
+            --reading-line-height: 1.8; /* 預設行距 1.8 倍 */
+        }
+
         body {
             font-family: "Microsoft JhengHei", Arial, sans-serif;
             margin: 0; padding: 0;
@@ -18,7 +25,7 @@
         .content-area {
             max-width: 900px;
             margin: 0 auto;
-            padding: 40px 20px 60px 20px; 
+            padding: 40px 20px 120px 20px; 
             background-color: transparent;
             flex-grow: 1; 
             width: 100%;
@@ -35,7 +42,6 @@
             line-height: 1.4;
         }
         
-        /* 📖 目錄排版 */
         .book-toc-wrapper {
             background: #fff; padding: 40px; border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -53,7 +59,6 @@
             margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden;
         }
         
-        /* 📂 讓大章節標題變成可點擊的按鈕 */
         .toc-chapter-header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; font-size: 18px; font-weight: bold; color: white;
@@ -63,7 +68,6 @@
         }
         .toc-chapter-header:hover { filter: brightness(0.95); }
         
-        /* 旋轉小箭頭動畫 */
         .toggle-icon {
             display: inline-block;
             margin-right: 10px;
@@ -73,7 +77,6 @@
 
         .toc-chapter-count { font-size: 14px; opacity: 0.95; font-weight: normal; text-align: right; line-height: 1.4; }
 
-        /* 預設隱藏子目錄 */
         .toc-chapter-items { display: none; }
 
         .toc-item {
@@ -96,22 +99,31 @@
             padding: 25px; margin-bottom: 25px; border-radius: 0 8px 8px 0;
             box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
+        
+        /* 🎚️ 綁定 CSS 變數：加入 line-height 行距連動 */
         .article-title { 
-            font-size: 24px; font-weight: bold; color: #2980b9; 
+            font-size: var(--reading-title-size); 
+            line-height: var(--reading-line-height);
+            font-weight: bold; color: #2980b9; 
             margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 8px;
+            transition: font-size 0.1s ease-out, line-height 0.1s ease-out;
+        }
+        .article-text { 
+            text-align: justify; 
+            font-size: var(--reading-font-size); 
+            line-height: var(--reading-line-height);
+            transition: font-size 0.1s ease-out, line-height 0.1s ease-out;
         }
         
-        .article-text { line-height: 1.8; text-align: justify; font-size: 17px; }
         .normal-text { display: block; margin-top: 5px; }
         .flex-list { display: flex; margin-top: 8px; }
         .sub-flex-list { display: flex; margin-top: 8px; padding-left: 2.5em; color: #444; }
         .list-prefix { flex-shrink: 0; white-space: nowrap; }
         .list-content { flex-grow: 1; }
 
-        /* 🛡️ 專業版權與免責宣告頁尾 */
         .legal-footer {
             text-align: center;
-            padding: 25px 20px;
+            padding: 25px 20px 100px 20px; 
             color: #7f8c8d;
             font-size: 13px;
             line-height: 1.6;
@@ -121,7 +133,6 @@
         }
         .legal-footer strong { color: #2c3e50; }
 
-        /* 🧮 右上角計算機按鈕 */
         .fixed-calc-btn {
             position: fixed; top: 15px; right: 20px; z-index: 1000;
             padding: 10px 20px; background-color: #27ae60; border: none; 
@@ -131,27 +142,60 @@
         }
         .fixed-calc-btn:hover { background-color: #219653; transform: translateY(-2px); }
 
-        /* 📱 手機版高資訊密度優化 */
+        .font-slider-panel {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(5px);
+            color: white;
+            padding: 15px 30px; 
+            border-radius: 20px; 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .slider-row input[type="range"] {
+            cursor: pointer;
+            width: 250px; 
+            accent-color: #f39c12;
+        }
+        
+        .font-icon { font-weight: bold; user-select: none; font-size: 16px; width: 20px; text-align: center; }
+
         @media (max-width: 768px) {
-            .content-area { padding: 10px 6px 40px 6px; } 
+            :root {
+                --reading-font-size: 15px;
+                --reading-title-size: 20px;
+                --reading-line-height: 1.6; /* 手機預設稍微緊一點 */
+            }
+            .content-area { padding: 10px 6px 120px 6px; } 
             .book-toc-wrapper { padding: 15px 10px; }
-            .fixed-home-btn { 
-                padding: 6px 12px !important; font-size: 13px !important; 
-                top: 8px !important; left: 8px !important; 
-            }
-            .fixed-calc-btn { 
-                padding: 6px 12px !important; font-size: 13px !important; 
-                top: 8px !important; right: 8px !important; 
-            }
+            .fixed-home-btn { padding: 6px 12px !important; font-size: 13px !important; top: 8px !important; left: 8px !important; }
+            .fixed-calc-btn { padding: 6px 12px !important; font-size: 13px !important; top: 8px !important; right: 8px !important; }
             .articles-viewer-body { margin-top: 45px; }
             h2 { font-size: 17px; margin-bottom: 15px; line-height: 1.3; }
             .article-block { padding: 12px 10px; margin-bottom: 15px; border-left-width: 3px; }
-            .article-title { font-size: 19px; margin-bottom: 8px; padding-bottom: 4px; }
-            .article-text { font-size: 14px; line-height: 1.5; }
             .sub-flex-list { padding-left: 1.2em; margin-top: 4px; } 
             .flex-list { margin-top: 4px; }
-            .legal-footer { padding: 15px 10px; font-size: 12px; }
+            .legal-footer { padding: 15px 10px 100px 10px; font-size: 12px; }
             .toc-chapter-count { font-size: 12px; }
+            
+            .font-slider-panel { bottom: 15px; padding: 12px 20px; gap: 10px; border-radius: 15px; }
+            .slider-row input[type="range"] { width: 200px; }
         }
     </style>
 </head>
@@ -160,9 +204,7 @@
     <a href="vd-calc.html" target="_blank" class="fixed-calc-btn">🧮 壓降計算機</a>
 
     <div class="content-area" id="mainContent">
-        <h2 style="color:#e74c3c; text-align:center;">⚠️ 尚未貼上法規資料</h2>
-        <p style="text-align:center;">請用記事本打開這個 HTML 檔案，找到 <b>[請把法規全部貼在這裡]</b> 的地方，將幾萬字的法規貼上去並存檔。</p>
-    </div>
+        </div>
 
     <div class="legal-footer">
         <strong>© 2026 [你的名字/暱稱]. All Rights Reserved.</strong><br>
@@ -12109,14 +12151,12 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
 
 第一千零十四條
 本規則自發布日施行。但中華民國一百十四年五月九日修正發布之第五章第十
-一節至第七章及第九章第一節至第三節條文，自發布後一年施行。
-</script>
+一節至第七章及第九章第一節至第三節條文，自發布後一年施行。</script>
 
 <script>
     let ruleBook = [];
     const mainContent = document.getElementById('mainContent');
 
-    // 🔢 中文數字轉阿拉伯數字翻譯機
     function zhToNum(zh) {
         const numMap = {'零':0, '〇':0, '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9};
         const unitMap = {'十':10, '百':100, '千':1000};
@@ -12136,7 +12176,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         return result;
     }
 
-    // 🏆 終極大腦解析器
     function parseTextToRuleBook(text) {
         let sections = [];
         let currentSectionObj = null;
@@ -12278,7 +12317,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         { header: '#16a085', body: '#e0f2f1' }  
     ];
 
-    // 📂 點擊章節展開/收合的動畫邏輯
     window.toggleChapter = function(headerElement) {
         const itemsDiv = headerElement.nextElementSibling;
         const icon = headerElement.querySelector('.toggle-icon');
@@ -12292,7 +12330,17 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         }
     };
 
-    // 📖 渲染多階層總目錄
+    // 🎚️ 改變字體大小
+    window.changeFontSize = function(size) {
+        document.documentElement.style.setProperty('--reading-font-size', size + 'px');
+        document.documentElement.style.setProperty('--reading-title-size', (parseInt(size) + 7) + 'px');
+    };
+
+    // 🎚️ 改變行距 (Line Height)
+    window.changeLineHeight = function(height) {
+        document.documentElement.style.setProperty('--reading-line-height', height);
+    };
+
     function renderHomeTOC() {
         let htmlContent = `
             <div class="book-toc-wrapper">
@@ -12302,7 +12350,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         
         let currentChapterParsed = "";
         let colorIndex = -1;
-        let currentSectionParsed = ""; // 🛡️ 追蹤目前的「節」，用來揪出幽靈節點
+        let currentSectionParsed = "";
 
         ruleBook.forEach((section, index) => {
             if(section.articles.length === 0) return;
@@ -12316,7 +12364,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                     htmlContent += `</div></div>`; 
                 }
                 currentChapterParsed = chapterNameFull;
-                currentSectionParsed = ""; // 換章時重置節的追蹤
+                currentSectionParsed = ""; 
                 colorIndex = (colorIndex + 1) % chapterColors.length; 
                 
                 let chapterSections = ruleBook.filter(s => s.title.startsWith(currentChapterParsed) && s.articles.length > 0);
@@ -12343,7 +12391,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                 `;
             }
 
-            // 🐛 抓出幽靈節點：如果我們進入了新的「節」，但它本身沒有直接的條文（例如第八節），手動把它印出來！
             if (sectionNameFull && sectionNameFull !== currentSectionParsed) {
                 currentSectionParsed = sectionNameFull;
 
@@ -12395,8 +12442,23 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
     function renderSection(index) {
         const section = ruleBook[index];
         
+        // 🎚️ 雙層滑桿（上方：大小控制 | 下方：行距控制）
         let htmlContent = `
             <button class="fixed-home-btn" onclick="renderHomeTOC()">🏠 回到總目錄</button>
+            
+            <div class="font-slider-panel">
+                <div class="slider-row">
+                    <span class="font-icon" style="font-size: 14px;">A</span>
+                    <input type="range" min="14" max="32" value="17" oninput="changeFontSize(this.value)">
+                    <span class="font-icon" style="font-size: 20px;">A</span>
+                </div>
+                <div class="slider-row">
+                    <span class="font-icon" style="font-size: 12px;">↕</span>
+                    <input type="range" min="1.2" max="3.0" value="1.8" step="0.1" oninput="changeLineHeight(this.value)">
+                    <span class="font-icon" style="font-size: 18px;">↕</span>
+                </div>
+            </div>
+
             <div class="articles-viewer-body">
                 <h2>${section.title}</h2>
                 <div class="articles-container">
