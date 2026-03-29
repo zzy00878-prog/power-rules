@@ -121,7 +121,6 @@
         .list-prefix { flex-shrink: 0; white-space: nowrap; font-weight: bold; color: #2980b9; margin-right: 4px; } 
         .list-content { flex-grow: 1; }
 
-        /* 🟦 藍色：圖片表格按鈕 */
         .inline-table-btn {
             display: inline-flex; align-items: center; background-color: #e8f4fd; color: #2980b9;
             border: 1px solid #b3d7f2; padding: 0px 10px; border-radius: 15px; font-size: 0.9em;
@@ -130,7 +129,6 @@
         }
         .inline-table-btn:hover { background-color: #d0e7f9; transform: translateY(-1px); }
 
-        /* 🟧 橘色：法條交叉參照按鈕 */
         .inline-article-btn {
             display: inline-flex; align-items: center; background-color: #fdf2e9; color: #d35400;
             border: 1px solid #f8c471; padding: 0px 10px; border-radius: 15px; font-size: 0.9em;
@@ -139,7 +137,6 @@
         }
         .inline-article-btn:hover { background-color: #fae5d3; transform: translateY(-1px); }
 
-        /* 🚀 彈出式燈箱共用底色 */
         .lightbox-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 99999; display: none;
@@ -147,18 +144,27 @@
             backdrop-filter: blur(3px);
         }
 
-        /* 📸 圖片專用內容框 */
         .lightbox-content { position: relative; max-width: 95%; max-height: 85%; display: flex; flex-direction: column; align-items: center; }
         .lightbox-content img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 4px 25px rgba(0,0,0,0.5); background: #fff; object-fit: contain; }
 
-        /* 📖 法條專用內容框 */
+        /* 🌟 核心修改：法條專用內容框綁定 CSS 變數！ */
         .lightbox-text-content {
             position: relative; width: 90%; max-width: 600px; max-height: 80vh;
             background: #fff; border-radius: 12px; padding: 25px;
             display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .lightbox-text-header { font-size: 22px; font-weight: bold; color: #d35400; border-bottom: 2px dashed #f8c471; padding-bottom: 10px; margin-bottom: 15px; }
-        .lightbox-text-body { overflow-y: auto; font-size: 16px; line-height: 1.8; color: #333; padding-right: 10px; text-align: justify; }
+        .lightbox-text-header { 
+            font-size: var(--reading-title-size); /* 跟隨主標題大小 */
+            font-weight: bold; color: #d35400; border-bottom: 2px dashed #f8c471; 
+            padding-bottom: 10px; margin-bottom: 15px; transition: font-size 0.1s ease-out;
+        }
+        .lightbox-text-body { 
+            overflow-y: auto; 
+            font-size: var(--reading-font-size);  /* 跟隨主文字大小 */
+            line-height: var(--reading-line-height); /* 跟隨主行距 */
+            color: #333; padding-right: 10px; text-align: justify;
+            transition: font-size 0.1s ease-out, line-height 0.1s ease-out;
+        }
 
         .lightbox-close {
             margin-top: 15px; padding: 10px 25px; background: #e74c3c; color: white;
@@ -199,8 +205,6 @@
             
             .inline-table-btn, .inline-article-btn { padding: 0px 8px; font-size: 0.85em; }
             .lightbox-text-content { padding: 15px; }
-            .lightbox-text-header { font-size: 18px; }
-            .lightbox-text-body { font-size: 15px; }
         }
     </style>
 </head>
@@ -12242,7 +12246,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         });
     }
 
-    // 🚀 法條交叉參照功能：掃描內文中的「第XXX條」變成橘色按鈕
     function autoLinkArticles(str) {
         return str.replace(/第\s*(\d+)\s*條(?:之\s*(\d+))?/g, function(match, mainNum, subNum) {
             let targetTitle = `第${mainNum}條`;
@@ -12280,7 +12283,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         let found = false;
         let contentHtml = "";
         
-        // 去大腦 (ruleBook) 裡面翻找對應的條文
         for(let sec of ruleBook) {
             for(let art of sec.articles) {
                 if (art.title === title) {
@@ -12297,7 +12299,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             document.getElementById('lightboxTextBody').innerHTML = contentHtml;
             document.getElementById('articleLightbox').style.display = 'flex';
         } else {
-            alert('⚠️ 找不到 ' + title + ' 的內容！可能是法規中尚無此條文。');
+            alert('⚠️ 找不到 ' + title + ' 的內容！可能是法規中尚無此條文，或尚未輸入該條文。');
         }
     };
     window.closeArticleLightbox = function(event) {
@@ -12329,10 +12331,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         function saveArticle() {
             if(currentSectionObj && currentArticle && currentArticle.content) {
                 currentArticle.content += closeCurrentBlock(); 
-                
-                // 🌟 所有拼接完成的段落，最後一併通過「中文變數字」、「掃描表格」、「掃描法條」三大引擎
                 currentArticle.content = autoLinkArticles(autoLinkTables(replaceZhNums(currentArticle.content)));
-                
                 currentSectionObj.articles.push(currentArticle);
             }
             currentArticle = null;
