@@ -12286,9 +12286,9 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         return tempStr;
     }
 
-    // 自動鏈結附表按鈕 ( updated previously to image folder)
+    // 1. 自動鏈結附表按鈕 (🚀 修正版：加入 \- 保護減號，確保 -1 不會跑出去)
     function autoLinkTables(str) {
-        return str.replace(/(?:附)?表\s*(\d+)(?:\s*[～~-－]\s*(\d+))?/g, function(match, p1, p2) {
+        return str.replace(/(?:附)?表\s*(\d+)(?:\s*[～~－\-]\s*(\d+))?/g, function(match, p1, p2) {
             let isFuBiao = match.startsWith("附表");
             let prefix = isFuBiao ? "附表" : "表";
             let btnText = p2 ? `📊 ${prefix}${p1}-${p2}` : `📊 ${prefix}${p1}`;
@@ -12296,24 +12296,22 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             return `<span class="inline-table-btn" onclick="openTable('${fileName}')">${btnText}</span>`;
         });
     }
-    // 🚀 新增：自動展開表格範圍的魔法函式
+
+    // 2. 自動展開表格範圍的魔法函式 (🚀 修正版：同步保護辨識規則)
     function expandTableRanges(str) {
-        // 偵測「表A-X 至 表A-Y」或「表A 至 表B」的句型 (也支援 "到" 或 "～")
-        return str.replace(/(附?表)\s*(\d+)(?:\s*[～~-－]\s*(\d+))?\s*[至到]\s*(?:附?表)?\s*(\d+)(?:\s*[～~-－]\s*(\d+))?/g, function(match, prefix, m1, s1, m2, s2) {
+        return str.replace(/(附?表)\s*(\d+)(?:\s*[～~－\-]\s*(\d+))?\s*[至到]\s*(?:附?表)?\s*(\d+)(?:\s*[～~－\-]\s*(\d+))?/g, function(match, prefix, m1, s1, m2, s2) {
             
-            // 情況 1：例如「表258-1 至 表258-3」(主條號一樣，附屬號碼不同)
             if (m1 === m2 && s1 && s2) {
                 let start = parseInt(s1);
                 let end = parseInt(s2);
-                if (start < end && (end - start) <= 10) { // 防呆：最多一次展開 10 個
+                if (start < end && (end - start) <= 10) {
                     let expanded = [];
                     for (let i = start; i <= end; i++) {
-                        expanded.push(`${prefix}${m1}-${i}`); // 組裝成 表258-1、表258-2...
+                        expanded.push(`${prefix}${m1}-${i}`); 
                     }
-                    return expanded.join('、'); // 用頓號連接
+                    return expanded.join('、');
                 }
             }
-            // 情況 2：例如「表10 至 表12」(只有主號碼)
             else if (!s1 && !s2 && m1 !== m2) {
                 let start = parseInt(m1);
                 let end = parseInt(m2);
@@ -12325,7 +12323,6 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
                     return expanded.join('、');
                 }
             }
-            // 如果邏輯不通（例如 表5至表3），就原封不動退回原本的字
             return match;
         });
     }
