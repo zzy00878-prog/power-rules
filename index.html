@@ -12241,10 +12241,11 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
             let isFuBiao = match.startsWith("附表");
             let prefix = isFuBiao ? "附表" : "表";
             let btnText = p2 ? `📊 ${prefix}${p1}-${p2}` : `📊 ${prefix}${p1}`;
-            let fileName = p2 ? `${prefix}${p1}-${p2}.png` : `${prefix}${p1}.png`;
+            // 🌟 這裡加上 images/ 路徑，告訴程式去資料夾裡面找圖片
+            let fileName = p2 ? `images/${prefix}${p1}-${p2}.png` : `images/${prefix}${p1}.png`;
             return `<span class="inline-table-btn" onclick="openTable('${fileName}')">${btnText}</span>`;
         });
-    }
+    }v
 
     function autoLinkArticles(str) {
         return str.replace(/第\s*(\d+)\s*條(?:之\s*(\d+))?/g, function(match, mainNum, subNum) {
