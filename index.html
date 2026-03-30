@@ -174,46 +174,7 @@
         }
         .fixed-home-btn:hover { background-color: #2c3e50; transform: translateX(-3px); }
 
-        /* 🛠️ 工具箱容器 */
-.toolbox-dropdown {
-    position: fixed; top: 15px; right: 20px; z-index: 1005;
-}
-
-/* 🛠️ 工具箱主按鈕 */
-.toolbox-btn {
-    padding: 10px 20px; background-color: #27ae60; border: none; 
-    color: white; border-radius: 5px; cursor: pointer; font-weight: bold; 
-    font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
-}
-.toolbox-btn:hover { background-color: #219653; }
-
-/* 🛠️ 下拉選單內容 */
-.dropdown-content {
-    display: none; position: absolute; right: 0; top: 100%;
-    background-color: white; min-width: 220px; border-radius: 8px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2); overflow: hidden; margin-top: 10px;
-}
-
-/* 🛠️ 選單內的項目 */
-.dropdown-content a {
-    color: #333; padding: 12px 16px; text-decoration: none;
-    display: block; font-size: 15px; font-weight: bold;
-    border-bottom: 1px solid #f0f0f0; transition: 0.2s;
-}
-.dropdown-content a:hover { background-color: #f8f9fa; color: #27ae60; }
-.dropdown-content a:last-child { border-bottom: none; }
-
-/* 🛠️ 滑鼠移入時顯示選單 */
-.toolbox-dropdown:hover .dropdown-content { display: block; }
-
-/* 手機版適應 */
-@media (max-width: 768px) {
-    .toolbox-dropdown { top: 10px; right: 10px; }
-    .toolbox-btn { padding: 8px 15px; font-size: 14px; }
-    .dropdown-content { min-width: 180px; }
-}
-
-        /* 🚀 新增：圓形 Aa 懸浮按鈕 */
+        /* 🚀 調整字體懸浮開關按鈕與其滑桿面板 (右下角) */
         .floating-font-btn {
             position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px;
             background-color: #f39c12; color: white; border: none; border-radius: 50%;
@@ -223,64 +184,85 @@
         }
         .floating-font-btn:hover { background-color: #e67e22; transform: scale(1.1); }
 
-        /* 🚀 修改：將滑桿面板移到右下角，並加上動畫隱藏效果 */
         .font-slider-panel { 
             position: fixed; bottom: 85px; right: 25px; 
             background: rgba(44, 62, 80, 0.95); backdrop-filter: blur(5px); color: white; 
             padding: 15px 25px; border-radius: 20px; display: flex; flex-direction: column; 
             align-items: center; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 1000;
-            
-            /* 動畫控制設定 */
             opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.9);
             transform-origin: bottom right; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
-        /* 🚀 當面板被加上 'show' 這個 class 時才會彈出來 */
-        .font-slider-panel.show {
-            opacity: 1; pointer-events: auto; transform: translateY(0) scale(1);
-        }
+        .font-slider-panel.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
         .slider-row { display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; }
         .slider-row input[type="range"] { cursor: pointer; width: 200px; accent-color: #f39c12; }
         .font-icon { font-weight: bold; user-select: none; font-size: 16px; width: 20px; text-align: center; }
+
+        /* 🛠️ 整合型工具箱 CSS：解決「移走就不見」與「加入 3 工具」 */
+        .toolbox-dropdown {
+            position: fixed; top: 15px; right: 20px; z-index: 1005;
+            padding-bottom: 25px; /* 🚀 核心魔法：增加下方感應區，滑鼠就不會斷掉 */
+        }
+
+        .toolbox-btn {
+            padding: 10px 20px; background-color: #27ae60; border: none; 
+            color: white; border-radius: 5px; cursor: pointer; font-weight: bold; 
+            font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .toolbox-btn:hover { background-color: #219653; }
+
+        .dropdown-content {
+            display: none; position: absolute; right: 0; 
+            top: 45px; /* 調整位置，與按鈕保持感應肉體 */
+            background-color: white; min-width: 220px; border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2); overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        /* 🚀 核心魔法：在按鈕與選單間墊一個隱形橋樑，滑鼠移過去保證不消失 */
+        .toolbox-dropdown::after {
+            content: ""; position: absolute; top: 100%; left: 0; width: 100%; height: 20px;
+        }
+
+        .toolbox-dropdown:hover .dropdown-content { display: block; }
+
+        .dropdown-content a {
+            color: #333; padding: 12px 16px; text-decoration: none;
+            display: block; font-size: 15px; font-weight: bold;
+            border-bottom: 1px solid #f0f0f0; transition: 0.2s;
+        }
+        .dropdown-content a:hover { background-color: #f8f9fa; color: #27ae60; }
+        .dropdown-content a:last-child { border-bottom: none; }
 
         @media (max-width: 768px) {
             :root { --reading-font-size: 15px; --reading-title-size: 20px; --reading-line-height: 1.6; }
             .content-area { padding: 10px 6px 120px 6px; } 
             .book-toc-wrapper { padding: 15px 10px; }
             .fixed-home-btn { padding: 8px 15px !important; font-size: 14px !important; top: 10px !important; left: 10px !important; }
-            .fixed-calc-btn { padding: 6px 12px !important; font-size: 13px !important; top: 10px !important; right: 10px !important; }
+            .toolbox-dropdown { top: 10px !important; right: 10px !important; }
+            .toolbox-btn { padding: 8px 15px !important; font-size: 14px !important; }
+            .dropdown-content { top: 40px !important; min-width: 180px !important; }
             .articles-viewer-body { margin-top: 55px; }
             h2 { font-size: 17px; margin-bottom: 15px; line-height: 1.3; }
             .article-block { padding: 12px 10px; margin-bottom: 15px; border-left-width: 3px; }
             
-            .sub-flex-list { padding-left: 1.0em; margin-top: 4px; } 
-            .sub-flex-list-3rd { padding-left: 1.8em; margin-top: 4px; } 
-            .flex-list { margin-top: 4px; }
-            .legal-footer { padding: 15px 10px 100px 10px; font-size: 12px; }
-            .toc-chapter-count { font-size: 12px; }
-            
             .floating-font-btn { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 16px; }
             .font-slider-panel { bottom: 70px; right: 15px; padding: 12px 15px; gap: 10px; border-radius: 15px; }
             .slider-row input[type="range"] { width: 160px; }
-            
-            .inline-table-btn, .inline-article-btn { padding: 0px 8px; font-size: 0.85em; }
-            .lightbox-text-content { padding: 15px; }
-            .lightbox-text-header { font-size: 18px; }
-            .lightbox-text-body { font-size: 15px; }
         }
     </style>
 </head>
 <body>
 
     <button id="backBtn" class="fixed-home-btn" onclick="goBackToTOC()">⬅ 返回目錄</button>
+
     <div class="toolbox-dropdown">
-    <button class="toolbox-btn">🛠️ 常用工具 ▾</button>
-    <div class="dropdown-content">
-        <a href="vd-calc.html" target="_blank">🧮 電壓降與線徑計算機</a>
-        <a href="tray-calc.html" target="_blank">📏 梯型電纜架寬度計算機</a>
-        </div>
-</div>
+        <button class="toolbox-btn">🛠️ 常用工具 ▾</button>
+        <div class="dropdown-content">
+            <a href="vd-calc-busway.html">🧮 匯流排槽壓降計算機</a>
+            <a href="tray-calc.html">📏 梯型電纜架計算機</a>
+            <a href="vd-calc.html">⚡ 壓降計算機</a> </div>
+    </div>
 
     <div class="content-area">
         <div id="tocContainer"></div>
@@ -12264,16 +12246,17 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
 
 第一千零十四條
 本規則自發布日施行。但中華民國一百十四年五月九日修正發布之第五章第十
-一節至第七章及第九章第一節至第三節條文，自發布後一年施行。</script>
+一節至第七章及第九章第一節至第三節條文，自發布後一年施行。
+</script>
 
 <script>
     let ruleBook = [];
     let isTocRendered = false; 
 
+    // 全自動國字轉數字函數 (保留最佳解析能力)
     function zhToNum(zh) {
         const numMap = {'零':0, '〇':0, '○':0, '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9};
         const unitMap = {'十':10, '百':100, '千':1000};
-        
         let hasUnit = false;
         for (let i = 0; i < zh.length; i++) { if (unitMap[zh[i]] !== undefined) hasUnit = true; }
         if (!hasUnit) {
@@ -12293,6 +12276,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         result += tmp; return result;
     }
 
+    // 國字條文轉數字 (專業工程師正規軍法)
     function replaceZhNums(str) {
         const exceptions = ["一般", "一定", "一致", "萬一", "單一", "唯一", "一律", "一併", "一旦", "一體", "一經", "同一", "進一步", "一切", "一部分", "一端", "一側", "一角", "一向", "一直", "一帶", "一連", "一齊", "一再", "一生", "一如", "一旁", "一起", "一概", "一時", "一面", "第一"];
         let tempStr = str;
@@ -12302,6 +12286,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         return tempStr;
     }
 
+    // 自動鏈結附表按鈕 ( updated previously to image folder)
     function autoLinkTables(str) {
         return str.replace(/(?:附)?表\s*(\d+)(?:\s*[～~-－]\s*(\d+))?/g, function(match, p1, p2) {
             let isFuBiao = match.startsWith("附表");
@@ -12312,6 +12297,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         });
     }
 
+    // 自動鏈結交叉法條 (📖 書本按鈕)
     function autoLinkArticles(str) {
         return str.replace(/第\s*(\d+)\s*條(?:之\s*(\d+))?/g, function(match, mainNum, subNum) {
             let targetTitle = `第${mainNum}條`;
@@ -12320,6 +12306,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         });
     }
 
+    // 附表圖片燈箱邏輯
     window.openTable = function(src) {
         let img = document.getElementById('lightboxImg');
         let hint = document.getElementById('lightboxHint');
@@ -12341,6 +12328,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         }
     };
 
+    // 法條參照燈箱邏輯
     window.openArticlePopup = function(title) {
         let found = false; let contentHtml = "";
         for(let sec of ruleBook) {
@@ -12361,6 +12349,19 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         }
     };
 
+    // 字體調整邏輯
+    window.changeFontSize = function(size) {
+        document.documentElement.style.setProperty('--reading-font-size', size + 'px');
+        document.documentElement.style.setProperty('--reading-title-size', (parseInt(size) + 7) + 'px');
+    };
+    window.changeLineHeight = function(height) { document.documentElement.style.setProperty('--reading-line-height', height); };
+    
+    // 開關 Aa 滑桿面板
+    window.toggleFontPanel = function() {
+        document.getElementById('fontSlider').classList.toggle('show');
+    };
+
+    // 法規解析邏輯
     function parseTextToRuleBook(text) {
         let sections = []; let currentSectionObj = null; let currentArticle = null;
         let currentChapterName = ""; let currentSectionName = ""; let currentSubsectionName = ""; let currentItemName = "";       
@@ -12488,17 +12489,7 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         }
     };
 
-    window.changeFontSize = function(size) {
-        document.documentElement.style.setProperty('--reading-font-size', size + 'px');
-        document.documentElement.style.setProperty('--reading-title-size', (parseInt(size) + 7) + 'px');
-    };
-    window.changeLineHeight = function(height) { document.documentElement.style.setProperty('--reading-line-height', height); };
-
-    // 🚀 新增：觸發字體滑桿面板彈出與收合的函式
-    window.toggleFontPanel = function() {
-        document.getElementById('fontSlider').classList.toggle('show');
-    };
-
+    // 產生首頁目錄 HTML ( updated previously with hash routing support)
     function renderHomeTOC() {
         if (!isTocRendered) {
             let htmlContent = `
@@ -12573,22 +12564,25 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         }
     }
 
+    // 哈希路由 (Hash Routing) 視角控制邏輯 ( updated previously)
+    
     function showTOCView() {
         document.getElementById('sectionContainer').style.display = 'none';
         document.getElementById('tocContainer').style.display = 'block';
         document.getElementById('backBtn').style.display = 'none';
         
-        // 返回目錄時，確保按鈕和滑桿都收起來
+        // 返回目錄時，確保Aa面板和其開關隱藏，也確認工具箱選單關閉
         document.getElementById('fontToggleBtn').style.display = 'none';
         document.getElementById('fontSlider').classList.remove('show');
         
+        // 確保任何開著的燈箱關閉
         document.getElementById('tableLightbox').style.display = 'none';
         document.getElementById('articleLightbox').style.display = 'none';
     }
 
     function showSectionView(index) {
         const section = ruleBook[index];
-        if(!section) return;
+        if(!section) return; // 防呆
 
         let htmlContent = `
             <div class="articles-viewer-body" style="margin-top: 20px;">
@@ -12606,35 +12600,47 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
         htmlContent += `</div></div>`; 
         document.getElementById('sectionContainer').innerHTML = htmlContent;
         
+        // 切換視角
         document.getElementById('tocContainer').style.display = 'none';
         document.getElementById('sectionContainer').style.display = 'block';
         document.getElementById('backBtn').style.display = 'inline-block';
         
-        // 進入內文時，顯示「Aa」按鈕，但滑桿預設不彈出
+        // 進入內文時，顯示 Aa按鈕，但滑桿預設不彈出
         document.getElementById('fontToggleBtn').style.display = 'flex';
         document.getElementById('fontSlider').classList.remove('show');
         
         window.scrollTo(0, 0); 
     }
 
-    window.renderSection = function(index) { window.location.hash = 'section-' + index; }
-    window.goBackToTOC = function() { window.location.hash = ''; }
+    // 章節點擊動作
+    window.renderSection = function(index) {
+        window.location.hash = 'section-' + index;
+    }
 
+    // 返回按鈕動作
+    window.goBackToTOC = function() {
+        window.location.hash = ''; 
+    }
+
+    // 監聽網址哈希變化
     window.addEventListener('hashchange', function() {
         let hash = window.location.hash;
         if (hash.startsWith('#section-')) {
             let index = parseInt(hash.replace('#section-', ''));
             showSectionView(index);
         } else {
-            showTOCView(); 
+            showTOCView(); // 回到目錄
         }
     });
 
+    // 網站啟動時的初始化
     window.onload = function() {
         const text = document.getElementById('rawData').textContent.trim();
         if (text.length > 50 && text !== "[請把法規全部貼在這裡]") { 
             ruleBook = parseTextToRuleBook(text);
             renderHomeTOC(); 
+            
+            // 根據初始網址決定顯示內容
             if (window.location.hash.startsWith('#section-')) {
                 let index = parseInt(window.location.hash.replace('#section-', ''));
                 showSectionView(index);

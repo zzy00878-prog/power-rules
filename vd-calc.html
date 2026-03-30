@@ -1,182 +1,326 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>匯流排槽電壓降計算機</title>
-   <style>
-       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
-       .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-       h1 { text-align: center; color: #2c3e50; }
-       
-       fieldset { border: 1px solid #bdc3c7; border-radius: 6px; padding: 15px; margin-bottom: 20px; background-color: #fafbfc; }
-       legend { font-weight: bold; color: #2980b9; padding: 0 10px; font-size: 1.1em; }
-       
-       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-       .input-group { display: flex; flex-direction: column; }
-       .full-width { grid-column: 1 / -1; }
-       
-       label { margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #555; }
-       input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
-       
-       .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-       button { flex: 1; padding: 12px; font-size: 1.1em; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; color: white; }
-       .btn-calc { background-color: #3498db; }
-       .btn-calc:hover { background-color: #2980b9; }
-       .btn-export { background-color: #27ae60; display: none; } /* 初始隱藏 */
-       .btn-export:hover { background-color: #219653; }
-       
-       table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
-       th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-       th { background-color: #f2f2f2; color: #333; }
-       .note { font-size: 0.85em; color: #7f8c8d; margin-top: 15px; line-height: 1.5; }
-       .highlight { font-weight: bold; color: #e74c3c; }
-   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電力壓降計算機 V6</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f9; padding: 15px; margin: 0; color: #333; }
+        .container { max-width: 1300px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #2c3e50; margin-top: 0; border-bottom: 2px solid #ecf0f1; padding-bottom: 15px; }
+        
+        .panel { background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
+        .panel-title { font-weight: bold; color: #1a73e8; margin-bottom: 15px; font-size: 1.1em; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px; }
+        .input-group input, .input-group select { padding: 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; background: #fff; }
+        
+        .btn-row { margin-top: 15px; text-align: right; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .btn-add { background: #28a745; color: white; width: 100%; }
+        .btn-add:hover { background: #218838; }
+        
+        /* 表格與固定標題 */
+        .table-wrapper { max-height: 65vh; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; }
+        th { background: #34495e; color: white; padding: 12px 8px; text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.2); }
+        td { border-bottom: 1px solid #eee; border-right: 1px solid #eee; padding: 8px; text-align: center; vertical-align: middle; }
+        
+        /* ===== 新增：斑馬紋與滑鼠停駐高亮 ===== */
+        tbody tr:nth-child(even) { background-color: #f4f8fb; } /* 偶數列顯示淺藍灰底色 */
+        tbody tr:hover { background-color: #eaf3ff; } /* 滑鼠移過去會有高亮提示 */
+        
+        .val-warning { color: #e74c3c; font-weight: bold; background-color: #fce4e4; }
+        .val-safe { color: #27ae60; font-weight: bold; }
+        
+        /* 表格內的輸入框樣式 */
+        .inline-input { width: 70px; padding: 4px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; font-weight: bold; color: #1a73e8; }
+        .inline-select { padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; font-weight: bold; color: #1a73e8; }
+        .inline-input:focus, .inline-select:focus { outline: none; border-color: #e67e22; background: #fffdfa; }
+
+        .tools-area { margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: stretch;}
+        .tools-area textarea { flex: 1; min-width: 300px; height: 100px; padding: 10px; font-family: monospace; border: 2px dashed #a8c7fa; border-radius: 6px; background: #f8fbff; }
+        .btn-tool { background: #6c757d; color: white; width: 100%; text-align: left; padding: 8px 15px; font-size: 13px; margin-bottom: 5px; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-   <h1>各樓層電壓降計算</h1>
-   
-   <fieldset>
-       <legend>系統基本參數</legend>
-       <div class="grid">
-           <div class="input-group"><label>系統電壓 (V)</label><input type="number" id="sysVoltage" value="440" step="1"></div>
-           <div class="input-group"><label>總電流 (A)</label><input type="number" id="totalCurrent" value="300" step="1"></div>
-           <div class="input-group"><label>負載功因 (PF)</label><input type="number" id="pf" value="0.9" step="0.01" max="1"></div>
-       </div>
-   </fieldset>
+    <h2>⚡ 電力壓降計算機 V6 <span style="font-size:14px; color:#7f8c8d;">(斑馬紋與全動態修改版)</span></h2>
 
-   <fieldset>
-       <legend>建築與距離配置</legend>
-       <div class="grid">
-           <div class="input-group"><label>水平段距離 (米)</label><input type="number" id="horizontalDist" value="120" step="1"></div>
-           <div class="input-group"><label>樓層高度 (米)</label><input type="number" id="floorHeight" value="3" step="0.1"></div>
-           <div class="input-group full-width"><label>樓層列表 (由低到高，以逗號分隔)</label><input type="text" id="floors" value="B1, 1F, 2F, 3F, 4F, 5F, 6F, 7F, 8F"></div>
-       </div>
-   </fieldset>
+    <div class="panel">
+        <div class="panel-title">📝 手動輸入區 (可單筆加入)</div>
+        <div class="form-grid">
+            <div class="input-group"><label>迴路名稱</label><input type="text" id="f_name" placeholder="例: PNL-A"></div>
+            <div class="input-group"><label>系統相數</label><select id="f_phase"><option value="1.732">三相三線/四線</option><option value="2">單相二線</option></select></div>
+            <div class="input-group"><label>系統電壓(V)</label><input type="number" id="f_volt" value="380"></div>
+            <div class="input-group"><label>電流(A)</label><input type="number" id="f_amp" placeholder="輸入電流..."></div>
+            <div class="input-group"><label>功因(PF)</label><input type="number" id="f_pf" step="0.05" value="0.8"></div>
+            <div class="input-group"><label>材質</label><select id="f_mat" onchange="updateTempOptions()"><option value="CV">CV 電纜</option><option value="IV">IV 電線</option></select></div>
+            <div class="input-group"><label>溫度</label><select id="f_temp"></select></div>
+            <div class="input-group"><label>配管</label><select id="f_pipe"><option value="X_CV">磁性管(鋼)</option><option value="X_IV">非磁性/空氣</option></select></div>
+            <div class="input-group"><label>線徑(mm²)</label><select id="f_sq"></select></div>
+            <div class="input-group"><label>長度(m)</label><input type="number" id="f_len" placeholder="輸入長度..."></div>
+            <div class="input-group"><label>條數</label><input type="number" id="f_runs" value="1" min="1"></div>
+        </div>
+        <div class="btn-row"><button class="btn-add" onclick="addToList()">➕ 手動加入清單 (Enter)</button></div>
+    </div>
 
-   <fieldset>
-       <legend>匯流排規格與溫度校正</legend>
-       <div class="grid">
-           <div class="input-group"><label>匯流排 R (mΩ/m)</label><input type="number" id="res" value="0.05" step="0.001"></div>
-           <div class="input-group"><label>匯流排 X (mΩ/m)</label><input type="number" id="rea" value="0.04" step="0.001"></div>
-           <div class="input-group"><label>R值的基準溫度 (°C)</label><input type="number" id="tempBase" value="25" step="1"></div>
-           <div class="input-group"><label>計算時的運轉溫度 (°C)</label><input type="number" id="tempCalc" value="75" step="1"></div>
-       </div>
-   </fieldset>
+    <div class="tools-area">
+        <div style="flex:2;">
+            <div class="panel-title" style="margin-bottom: 5px;">📥 Excel 批次貼上區</div>
+            <span style="font-size:12px; color:#555;">※ 支援直接從 Excel 框選表格複製貼上。<br>順序：名稱 | 相數 | 電壓 | 電流 | 功因 | 材質 | 溫度 | 配管 | 線徑 | 條數 | 長度</span>
+            <textarea id="storageText" placeholder="在此貼上 Excel 複製的資料... (按 Ctrl+V)"></textarea>
+        </div>
+        <div style="flex:1; display: flex; flex-direction: column; justify-content: flex-end;">
+            <button class="btn-tool" style="background:#17a2b8;" onclick="importData()">⬆️ 1. 讀取貼上內容 (解析 Excel)</button>
+            <button class="btn-tool" style="background:#28a745;" onclick="exportToExcel()">📊 2. 下載當前表格為 Excel</button>
+            <button class="btn-tool" style="background:#e74c3c;" onclick="clearAll()">🗑️ 清空所有資料</button>
+        </div>
+    </div>
 
-   <div class="btn-group">
-       <button class="btn-calc" onclick="calculateVD()">開始計算</button>
-       <button id="exportBtn" class="btn-export" onclick="exportToCSV()">匯出成 Excel (CSV)</button>
-   </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th width="80">迴路名稱</th>
+                    <th width="80">系統/電壓</th>
+                    <th width="80">電流(A)</th>
+                    <th width="120">線材規格 / 配管</th>
+                    <th width="150">線徑(mm²) x 條數</th>
+                    <th width="90">長度(m)</th>
+                    <th width="120">查表 R / X</th>
+                    <th width="70">壓降(V)</th>
+                    <th width="90">壓降(%)</th>
+                    <th width="60">操作</th>
+                </tr>
+            </thead>
+            <tbody id="listBody"><tr><td colspan="10" style="color:#999; padding:20px;">請由上方輸入，或由 Excel 貼上資料...</td></tr></tbody>
+        </table>
+    </div>
 
-   <div id="result"></div>
-   
-   <div class="note">
-       * 壓降率 = (累計電壓降 / 系統電壓) × 100%。通常法規建議幹線壓降不超過 3%。
-   </div>
 </div>
 
 <script>
-   function calculateVD() {
-       const V_sys = parseFloat(document.getElementById('sysVoltage').value);
-       const I_total = parseFloat(document.getElementById('totalCurrent').value);
-       const PF = parseFloat(document.getElementById('pf').value);
-       
-       const L_horizontal = parseFloat(document.getElementById('horizontalDist').value);
-       const H_floor = parseFloat(document.getElementById('floorHeight').value);
-       const floorsArray = document.getElementById('floors').value.split(',').map(f => f.trim());
-       
-       const R_mOhm_base = parseFloat(document.getElementById('res').value);
-       const X_mOhm = parseFloat(document.getElementById('rea').value);
-       const T_base = parseFloat(document.getElementById('tempBase').value);
-       const T_calc = parseFloat(document.getElementById('tempCalc').value);
+    const wireDB = {
+        "1.6": { IV: { R20: 8.9200, R50: 9.9717, R60: 10.3222 }, CV: { R20: 8.7480, R50: 9.7794, R90: 11.1546 }, X_IV: 0.12340, X_CV: 0.1799 },
+        "2":   { IV: { R20: 5.6500, R50: 6.3161, R60: 6.5382 }, CV: { R20: 5.5430, R50: 6.1965, R90: 7.0679 }, X_IV: 0.11540, X_CV: 0.1610 },
+        "3.5": { IV: { R20: 5.2000, R50: 5.8131, R60: 6.0174 }, CV: { R20: 5.0600, R50: 5.6566, R90: 6.4520 }, X_IV: 0.11500, X_CV: 0.1647 },
+        "5.5": { IV: { R20: 3.3300, R50: 3.7226, R60: 3.8535 }, CV: { R20: 3.2400, R50: 3.6220, R90: 4.1313 }, X_IV: 0.11500, X_CV: 0.1544 },
+        "8":   { IV: { R20: 2.3100, R50: 2.5823, R60: 2.6731 }, CV: { R20: 2.2500, R50: 2.5153, R90: 2.8690 }, X_IV: 0.11500, X_CV: 0.1527 },
+        "14":  { IV: { R20: 1.3000, R50: 1.4533, R60: 1.5044 }, CV: { R20: 1.2600, R50: 1.4086, R90: 1.6066 }, X_IV: 0.11100, X_CV: 0.1505 },
+        "22":  { IV: { R20: 0.8240, R50: 0.9211, R60: 0.9535 }, CV: { R20: 0.8010, R50: 0.8954, R90: 1.0214 }, X_IV: 0.10870, X_CV: 0.1418 },
+        "30":  { IV: { R20: 0.6230, R50: 0.6965, R60: 0.7209 }, CV: { R20: 0.6060, R50: 0.6774, R90: 0.7727 }, X_IV: 0.10810, X_CV: 0.1369 },
+        "38":  { IV: { R20: 0.4870, R50: 0.5444, R60: 0.5636 }, CV: { R20: 0.4740, R50: 0.5299, R90: 0.6044 }, X_IV: 0.10570, X_CV: 0.1369 },
+        "50":  { IV: { R20: 0.3780, R50: 0.4226, R60: 0.4374 }, CV: { R20: 0.3680, R50: 0.4114, R90: 0.4692 }, X_IV: 0.10090, X_CV: 0.1370 },
+        "60":  { IV: { R20: 0.3030, R50: 0.3387, R60: 0.3506 }, CV: { R20: 0.2950, R50: 0.3298, R90: 0.3762 }, X_IV: 0.09852, X_CV: 0.1333 },
+        "80":  { IV: { R20: 0.2290, R50: 0.2560, R60: 0.2650 }, CV: { R20: 0.2230, R50: 0.2493, R90: 0.2843 }, X_IV: 0.09565, X_CV: 0.1288 },
+        "100": { IV: { R20: 0.1800, R50: 0.2012, R60: 0.2083 }, CV: { R20: 0.1750, R50: 0.1956, R90: 0.2231 }, X_IV: 0.09337, X_CV: 0.1288 },
+        "125": { IV: { R20: 0.1440, R50: 0.1610, R60: 0.1666 }, CV: { R20: 0.1400, R50: 0.1565, R90: 0.1785 }, X_IV: 0.09353, X_CV: 0.1299 },
+        "150": { IV: { R20: 0.1180, R50: 0.1319, R60: 0.1365 }, CV: { R20: 0.1150, R50: 0.1286, R90: 0.1466 }, X_IV: 0.09225, X_CV: 0.1336 },
+        "200": { IV: { R20: 0.0932, R50: 0.1042, R60: 0.1079 }, CV: { R20: 0.0912, R50: 0.1020, R90: 0.1163 }, X_IV: 0.08987, X_CV: 0.1221 },
+        "250": { IV: { R20: 0.0735, R50: 0.0822, R60: 0.0851 }, CV: { R20: 0.0714, R50: 0.0798, R90: 0.0910 }, X_IV: 0.08830, X_CV: 0.1174 },
+        "325": { IV: { R20: 0.0582, R50: 0.0651, R60: 0.0673 }, CV: { R20: 0.0564, R50: 0.0630, R90: 0.0719 }, X_IV: 0.08729, X_CV: 0.1166 },
+        "250MCM": { IV: { R20: 0.1440, R50: 0.1610, R60: 0.1666 }, CV: { R20: 0.1400, R50: 0.1565, R90: 0.1785 }, X_IV: 0.09353, X_CV: 0.1299 }
+    };
 
-       const R_mOhm_corrected = R_mOhm_base * ((234.5 + T_calc) / (234.5 + T_base));
-       const R = R_mOhm_corrected / 1000;
-       const X = X_mOhm / 1000;
-       const sinTheta = Math.sqrt(1 - Math.pow(PF, 2));
-       const Z_eff = (R * PF) + (X * sinTheta);
+    let calcList = [];
 
-       let html = `<div style="margin-bottom: 10px; font-weight: bold; color: #27ae60;">
-                   經溫度校正後，計算用 R 值為: ${R_mOhm_corrected.toFixed(4)} mΩ/m
-                   </div>`;
+    window.onload = () => {
+        const sqSelect = document.getElementById('f_sq');
+        Object.keys(wireDB).forEach(sq => { sqSelect.add(new Option((sq.includes('MCM') ? sq : sq + ' mm²'), sq)); });
+        sqSelect.value = "38"; 
+        updateTempOptions();
+        document.addEventListener('keypress', function (e) { if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') addToList(); });
+    };
 
-       // 給表格加上 ID 方便後續抓取匯出
-       html += '<table id="resultTable"><tr><th>區段</th><th>長度 (m)</th><th>該段流經電流 (A)</th><th>區段壓降 (V)</th><th>到達電壓 (V)</th><th>累計壓降率 (%)</th></tr>';
+    function updateTempOptions() {
+        const mat = document.getElementById('f_mat').value;
+        const tempSel = document.getElementById('f_temp');
+        tempSel.innerHTML = ''; 
+        if (mat === 'IV') {
+            tempSel.add(new Option('20℃', 'R20')); tempSel.add(new Option('50℃', 'R50')); tempSel.add(new Option('60℃', 'R60'));
+            tempSel.value = 'R60'; 
+        } else {
+            tempSel.add(new Option('20℃', 'R20')); tempSel.add(new Option('50℃', 'R50')); tempSel.add(new Option('90℃', 'R90'));
+            tempSel.value = 'R50'; 
+        }
+    }
 
-       const numFloors = floorsArray.length;
-       const I_per_floor = I_total / numFloors;
+    function getSqOptionsHTML(currentSq) {
+        let html = '';
+        Object.keys(wireDB).forEach(sq => {
+            let label = sq.includes('MCM') ? sq : sq;
+            let selected = (sq === currentSq.toString()) ? 'selected' : '';
+            html += `<option value="${sq}" ${selected}>${label}</option>`;
+        });
+        return html;
+    }
 
-       let currentVoltage = V_sys;
-       let flowingCurrent = I_total;
-       
-       for (let i = 0; i < numFloors; i++) {
-           let segmentName = i === 0 ? `電源 -> ${floorsArray[i]}` : `${floorsArray[i-1]} -> ${floorsArray[i]}`;
-           let length = i === 0 ? L_horizontal : H_floor;
-           
-           let vd = Math.sqrt(3) * flowingCurrent * Z_eff * length;
-           currentVoltage -= vd;
-           
-           let cumulativeVD = V_sys - currentVoltage;
-           let vdPercentage = (cumulativeVD / V_sys) * 100;
+    function recalcItem(item) {
+        const dataDB = wireDB[item.sq];
+        if(!dataDB) return;
+        item.R_km = dataDB[item.mat] ? dataDB[item.mat][item.tempKey] : 0;
+        item.X_km = dataDB[item.pipeKey];
+        const R = item.R_km / 1000;
+        const X = item.X_km / 1000;
+        const sinTheta = Math.sqrt(1 - Math.pow(item.PF, 2));
+        const Z = (R * item.PF + X * sinTheta) / item.runs;
+        item.vd = item.k * item.I * Z * item.L;
+        item.vdp = (item.vd / item.V) * 100;
+    }
 
-           let vdStyle = vdPercentage > 3 ? 'class="highlight"' : '';
+    function updateRowData(index, field, value) {
+        let item = calcList[index];
+        // 判斷是文字還是數字
+        if (field === 'sq' || field === 'pipeKey') {
+            item[field] = value;
+        } else {
+            item[field] = parseFloat(value);
+        }
+        recalcItem(item);
+        renderTable();    
+    }
 
-           html += `<tr>
-               <td>${segmentName}</td>
-               <td>${length}</td>
-               <td>${flowingCurrent.toFixed(1)}</td>
-               <td>${vd.toFixed(2)}</td>
-               <td>${currentVoltage.toFixed(2)}</td>
-               <td ${vdStyle}>${vdPercentage.toFixed(2)} %</td>
-           </tr>`;
+    function addToList() {
+        const name = document.getElementById('f_name').value || "未命名";
+        const k = parseFloat(document.getElementById('f_phase').value);
+        const V = parseFloat(document.getElementById('f_volt').value);
+        const I = parseFloat(document.getElementById('f_amp').value);
+        const PF = parseFloat(document.getElementById('f_pf').value);
+        const mat = document.getElementById('f_mat').value;
+        const tempKey = document.getElementById('f_temp').value;
+        const pipeKey = document.getElementById('f_pipe').value;
+        const sq = document.getElementById('f_sq').value;
+        const L = parseFloat(document.getElementById('f_len').value);
+        const runs = parseInt(document.getElementById('f_runs').value) || 1;
 
-           flowingCurrent -= I_per_floor;
-       }
+        if (!I || !L) return alert("❌ 請務必輸入電流與長度！");
 
-       html += '</table>';
-       document.getElementById('result').innerHTML = html;
-       
-       // 計算完成後，把匯出按鈕顯示出來
-       document.getElementById('exportBtn').style.display = 'block';
-   }
+        let newItem = { name, k, V, I, PF, mat, tempKey, pipeKey, sq, L, runs };
+        recalcItem(newItem);
+        calcList.push(newItem);
+        renderTable();
+        document.getElementById('f_amp').focus(); 
+        document.getElementById('f_amp').select();
+    }
 
-   // 新增：匯出成 CSV 的函數
-   function exportToCSV() {
-       const table = document.getElementById("resultTable");
-       if (!table) return;
+    function renderTable() {
+        const body = document.getElementById('listBody');
+        if (calcList.length === 0) {
+            body.innerHTML = '<tr><td colspan="10" style="color:#999; padding:20px;">請由上方輸入，或由 Excel 貼上資料...</td></tr>';
+            return;
+        }
+        body.innerHTML = '';
+        calcList.forEach((item, index) => {
+            const phaseStr = item.k > 1.8 ? '單相' : '三相';
+            const tempStr = item.tempKey.replace('R', '') + '℃';
+            const vdClass = item.vdp > 3 ? 'val-warning' : 'val-safe';
+            
+            body.innerHTML += `
+                <tr>
+                    <td><strong>${item.name}</strong></td>
+                    <td style="font-size:12px; color:#555;">${phaseStr}<br>${item.V}V</td>
+                    
+                    <td><input type="number" class="inline-input" value="${item.I}" onchange="updateRowData(${index}, 'I', this.value)"> <br><span style="font-size:11px;color:#888;">PF:${item.PF}</span></td>
+                    
+                    <td style="font-size:12px;color:#666;">
+                        ${item.mat} / ${tempStr} <br>
+                        <select class="inline-select" style="margin-top:4px;" onchange="updateRowData(${index}, 'pipeKey', this.value)">
+                            <option value="X_CV" ${item.pipeKey === 'X_CV' ? 'selected' : ''}>磁管</option>
+                            <option value="X_IV" ${item.pipeKey === 'X_IV' ? 'selected' : ''}>非磁管</option>
+                        </select>
+                    </td>
+                    
+                    <td>
+                        <select class="inline-select" onchange="updateRowData(${index}, 'sq', this.value)">
+                            ${getSqOptionsHTML(item.sq)}
+                        </select>
+                        <br> 
+                        x <input type="number" class="inline-input" style="width:40px; margin-top:4px;" value="${item.runs}" onchange="updateRowData(${index}, 'runs', this.value)">
+                    </td>
+                    
+                    <td><input type="number" class="inline-input" style="width:75px;" value="${item.L}" onchange="updateRowData(${index}, 'L', this.value)"></td>
+                    
+                    <td style="font-size:11px; text-align:left; padding-left:10px;">R: ${item.R_km.toFixed(4)} <br>X: ${item.X_km.toFixed(4)}</td>
+                    <td style="font-weight:bold; font-size:14px;">${item.vd.toFixed(2)}</td>
+                    <td class="${vdClass}" style="font-size:14px;">${item.vdp.toFixed(4)}%</td>
+                    <td><button onclick="removeRow(${index})" style="background:#e74c3c; color:white; padding:4px 8px; font-size:12px; border:none; border-radius:3px;">刪除</button></td>
+                </tr>`;
+        });
+    }
 
-       let csv = [];
-       const rows = table.querySelectorAll("tr");
-       
-       for (let i = 0; i < rows.length; i++) {
-           let row = [];
-           const cols = rows[i].querySelectorAll("td, th");
-           
-           for (let j = 0; j < cols.length; j++) {
-               // 抓取文字並處理可能出現的逗號或換行
-               let data = cols[j].innerText.replace(/"/g, '""');
-               row.push('"' + data + '"');
-           }
-           csv.push(row.join(","));
-       }
+    function removeRow(i) { calcList.splice(i, 1); renderTable(); }
+    function clearAll() { if(confirm("確定清空所有資料？")) { calcList = []; renderTable(); } }
 
-       // 加上 \uFEFF 是為了讓 Excel 認得這是 UTF-8 編碼，中文才不會亂碼
-       const csvFile = new Blob(['\uFEFF' + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
-       
-       // 建立一個隱藏的下載連結並觸發點擊
-       const downloadLink = document.createElement("a");
-       downloadLink.download = "各樓層電壓降計算結果.csv";
-       downloadLink.href = window.URL.createObjectURL(csvFile);
-       downloadLink.style.display = "none";
-       
-       document.body.appendChild(downloadLink);
-       downloadLink.click();
-       document.body.removeChild(downloadLink);
-   }
+    function importData() {
+        const str = document.getElementById('storageText').value.trim();
+        if(!str) return alert("請先貼上資料！");
+
+        const lines = str.split('\n');
+        let importCount = 0;
+        
+        lines.forEach(line => {
+            const cols = line.split('\t');
+            if(cols.length >= 11) {
+                if(cols[0].includes('迴路名稱') || isNaN(parseFloat(cols[2]))) return;
+
+                const name = cols[0].trim();
+                const k = cols[1].includes('三相') ? 1.732 : 2;
+                const V = parseFloat(cols[2]);
+                const I = parseFloat(cols[3]);
+                const PF = parseFloat(cols[4]);
+                const mat = cols[5].trim().toUpperCase();
+                
+                let tempStr = cols[6].trim();
+                let tempKey = tempStr.includes('20') ? 'R20' : (tempStr.includes('60') ? 'R60' : (tempStr.includes('90') ? 'R90' : 'R50'));
+                let pipeKey = cols[7].trim().includes('磁性') && !cols[7].trim().includes('非') ? 'X_CV' : 'X_IV';
+                const sq = cols[8].trim().replace(/[^0-9.MCM]/g, ''); 
+                const runs = parseInt(cols[9]) || 1;
+                const L = parseFloat(cols[10]);
+
+                if(!isNaN(I) && !isNaN(L)) {
+                    let newItem = { name, k, V, I, PF, mat, tempKey, pipeKey, sq, L, runs };
+                    recalcItem(newItem);
+                    calcList.push(newItem);
+                    importCount++;
+                }
+            }
+        });
+
+        if(importCount > 0) {
+            alert(`✅ 成功匯入 ${importCount} 筆資料！`);
+            document.getElementById('storageText').value = '';
+            renderTable();
+        } else {
+            alert("❌ 解析失敗，請確認貼上的 Excel 格式。");
+        }
+    }
+
+    function exportToExcel() {
+        if(calcList.length === 0) return alert("目前沒有資料！");
+        let csvContent = "\uFEFF迴路名稱,系統相數,電壓(V),電流(A),功因(PF),線材材質,評估溫度,配管方式,線徑(mm2),並聯條數,單趟長度(m),R(Ω/km),X(Ω/km),壓降(V),壓降(%)\n";
+
+        calcList.forEach(item => {
+            let phaseStr = item.k > 1.8 ? '單相2L' : '三相';
+            let tempStr = item.tempKey.replace('R', '') + '℃';
+            let pipeStr = item.pipeKey === 'X_CV' ? '磁性管' : '非磁性/空氣中';
+            let row = [
+                item.name, phaseStr, item.V, item.I, item.PF,
+                item.mat, tempStr, pipeStr, item.sq, item.runs, item.L,
+                item.R_km.toFixed(4), item.X_km.toFixed(4), item.vd.toFixed(2), (item.vdp/100).toFixed(6)
+            ].join(",");
+            csvContent += row + "\n";
+        });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
+        link.download = "壓降計算結果.csv";
+        link.click();
+    }
 </script>
-
 </body>
 </html>

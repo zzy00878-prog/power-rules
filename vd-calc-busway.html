@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>匯流排槽電壓降計算機</title>
+   <style>
+       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+       .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+       h1 { text-align: center; color: #2c3e50; }
+       
+       fieldset { border: 1px solid #bdc3c7; border-radius: 6px; padding: 15px; margin-bottom: 20px; background-color: #fafbfc; }
+       legend { font-weight: bold; color: #2980b9; padding: 0 10px; font-size: 1.1em; }
+       
+       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+       .input-group { display: flex; flex-direction: column; }
+       .full-width { grid-column: 1 / -1; }
+       
+       label { margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #555; }
+       input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+       
+       .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+       button { flex: 1; padding: 12px; font-size: 1.1em; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; color: white; }
+       .btn-calc { background-color: #3498db; }
+       .btn-calc:hover { background-color: #2980b9; }
+       .btn-export { background-color: #27ae60; display: none; } /* 初始隱藏 */
+       .btn-export:hover { background-color: #219653; }
+       
+       table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
+       th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+       th { background-color: #f2f2f2; color: #333; }
+       .note { font-size: 0.85em; color: #7f8c8d; margin-top: 15px; line-height: 1.5; }
+       .highlight { font-weight: bold; color: #e74c3c; }
+   </style>
+</head>
+<body>
+
+<div class="container">
+   <h1>各樓層電壓降計算</h1>
+   
+   <fieldset>
+       <legend>系統基本參數</legend>
+       <div class="grid">
+           <div class="input-group"><label>系統電壓 (V)</label><input type="number" id="sysVoltage" value="440" step="1"></div>
+           <div class="input-group"><label>總電流 (A)</label><input type="number" id="totalCurrent" value="300" step="1"></div>
+           <div class="input-group"><label>負載功因 (PF)</label><input type="number" id="pf" value="0.9" step="0.01" max="1"></div>
+       </div>
+   </fieldset>
+
+   <fieldset>
+       <legend>建築與距離配置</legend>
+       <div class="grid">
+           <div class="input-group"><label>水平段距離 (米)</label><input type="number" id="horizontalDist" value="120" step="1"></div>
+           <div class="input-group"><label>樓層高度 (米)</label><input type="number" id="floorHeight" value="3" step="0.1"></div>
+           <div class="input-group full-width"><label>樓層列表 (由低到高，以逗號分隔)</label><input type="text" id="floors" value="B1, 1F, 2F, 3F, 4F, 5F, 6F, 7F, 8F"></div>
+       </div>
+   </fieldset>
+
+   <fieldset>
+       <legend>匯流排規格與溫度校正</legend>
+       <div class="grid">
+           <div class="input-group"><label>匯流排 R (mΩ/m)</label><input type="number" id="res" value="0.05" step="0.001"></div>
+           <div class="input-group"><label>匯流排 X (mΩ/m)</label><input type="number" id="rea" value="0.04" step="0.001"></div>
+           <div class="input-group"><label>R值的基準溫度 (°C)</label><input type="number" id="tempBase" value="25" step="1"></div>
+           <div class="input-group"><label>計算時的運轉溫度 (°C)</label><input type="number" id="tempCalc" value="75" step="1"></div>
+       </div>
+   </fieldset>
+
+   <div class="btn-group">
+       <button class="btn-calc" onclick="calculateVD()">開始計算</button>
+       <button id="exportBtn" class="btn-export" onclick="exportToCSV()">匯出成 Excel (CSV)</button>
+   </div>
+
+   <div id="result"></div>
+   
+   <div class="note">
+       * 壓降率 = (累計電壓降 / 系統電壓) × 100%。通常法規建議幹線壓降不超過 3%。
+   </div>
+</div>
+
+<script>
+   function calculateVD() {
+       const V_sys = parseFloat(document.getElementById('sysVoltage').value);
+       const I_total = parseFloat(document.getElementById('totalCurrent').value);
+       const PF = parseFloat(document.getElementById('pf').value);
+       
+       const L_horizontal = parseFloat(document.getElementById('horizontalDist').value);
+       const H_floor = parseFloat(document.getElementById('floorHeight').value);
+       const floorsArray = document.getElementById('floors').value.split(',').map(f => f.trim());
+       
+       const R_mOhm_base = parseFloat(document.getElementById('res').value);
+       const X_mOhm = parseFloat(document.getElementById('rea').value);
+       const T_base = parseFloat(document.getElementById('tempBase').value);
+       const T_calc = parseFloat(document.getElementById('tempCalc').value);
+
+       const R_mOhm_corrected = R_mOhm_base * ((234.5 + T_calc) / (234.5 + T_base));
+       const R = R_mOhm_corrected / 1000;
+       const X = X_mOhm / 1000;
+       const sinTheta = Math.sqrt(1 - Math.pow(PF, 2));
+       const Z_eff = (R * PF) + (X * sinTheta);
+
+       let html = `<div style="margin-bottom: 10px; font-weight: bold; color: #27ae60;">
+                   經溫度校正後，計算用 R 值為: ${R_mOhm_corrected.toFixed(4)} mΩ/m
+                   </div>`;
+
+       // 給表格加上 ID 方便後續抓取匯出
+       html += '<table id="resultTable"><tr><th>區段</th><th>長度 (m)</th><th>該段流經電流 (A)</th><th>區段壓降 (V)</th><th>到達電壓 (V)</th><th>累計壓降率 (%)</th></tr>';
+
+       const numFloors = floorsArray.length;
+       const I_per_floor = I_total / numFloors;
+
+       let currentVoltage = V_sys;
+       let flowingCurrent = I_total;
+       
+       for (let i = 0; i < numFloors; i++) {
+           let segmentName = i === 0 ? `電源 -> ${floorsArray[i]}` : `${floorsArray[i-1]} -> ${floorsArray[i]}`;
+           let length = i === 0 ? L_horizontal : H_floor;
+           
+           let vd = Math.sqrt(3) * flowingCurrent * Z_eff * length;
+           currentVoltage -= vd;
+           
+           let cumulativeVD = V_sys - currentVoltage;
+           let vdPercentage = (cumulativeVD / V_sys) * 100;
+
+           let vdStyle = vdPercentage > 3 ? 'class="highlight"' : '';
+
+           html += `<tr>
+               <td>${segmentName}</td>
+               <td>${length}</td>
+               <td>${flowingCurrent.toFixed(1)}</td>
+               <td>${vd.toFixed(2)}</td>
+               <td>${currentVoltage.toFixed(2)}</td>
+               <td ${vdStyle}>${vdPercentage.toFixed(2)} %</td>
+           </tr>`;
+
+           flowingCurrent -= I_per_floor;
+       }
+
+       html += '</table>';
+       document.getElementById('result').innerHTML = html;
+       
+       // 計算完成後，把匯出按鈕顯示出來
+       document.getElementById('exportBtn').style.display = 'block';
+   }
+
+   // 新增：匯出成 CSV 的函數
+   function exportToCSV() {
+       const table = document.getElementById("resultTable");
+       if (!table) return;
+
+       let csv = [];
+       const rows = table.querySelectorAll("tr");
+       
+       for (let i = 0; i < rows.length; i++) {
+           let row = [];
+           const cols = rows[i].querySelectorAll("td, th");
+           
+           for (let j = 0; j < cols.length; j++) {
+               // 抓取文字並處理可能出現的逗號或換行
+               let data = cols[j].innerText.replace(/"/g, '""');
+               row.push('"' + data + '"');
+           }
+           csv.push(row.join(","));
+       }
+
+       // 加上 \uFEFF 是為了讓 Excel 認得這是 UTF-8 編碼，中文才不會亂碼
+       const csvFile = new Blob(['\uFEFF' + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+       
+       // 建立一個隱藏的下載連結並觸發點擊
+       const downloadLink = document.createElement("a");
+       downloadLink.download = "各樓層電壓降計算結果.csv";
+       downloadLink.href = window.URL.createObjectURL(csvFile);
+       downloadLink.style.display = "none";
+       
+       document.body.appendChild(downloadLink);
+       downloadLink.click();
+       document.body.removeChild(downloadLink);
+   }
+</script>
+
+</body>
+</html>
