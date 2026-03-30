@@ -174,8 +174,44 @@
         }
         .fixed-home-btn:hover { background-color: #2c3e50; transform: translateX(-3px); }
 
-        .fixed-calc-btn { position: fixed; top: 15px; right: 20px; z-index: 1000; padding: 10px 20px; background-color: #27ae60; border: none; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s; text-decoration: none; display: inline-block; }
-        .fixed-calc-btn:hover { background-color: #219653; transform: translateY(-2px); }
+        /* 🛠️ 工具箱容器 */
+.toolbox-dropdown {
+    position: fixed; top: 15px; right: 20px; z-index: 1005;
+}
+
+/* 🛠️ 工具箱主按鈕 */
+.toolbox-btn {
+    padding: 10px 20px; background-color: #27ae60; border: none; 
+    color: white; border-radius: 5px; cursor: pointer; font-weight: bold; 
+    font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
+}
+.toolbox-btn:hover { background-color: #219653; }
+
+/* 🛠️ 下拉選單內容 */
+.dropdown-content {
+    display: none; position: absolute; right: 0; top: 100%;
+    background-color: white; min-width: 220px; border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2); overflow: hidden; margin-top: 10px;
+}
+
+/* 🛠️ 選單內的項目 */
+.dropdown-content a {
+    color: #333; padding: 12px 16px; text-decoration: none;
+    display: block; font-size: 15px; font-weight: bold;
+    border-bottom: 1px solid #f0f0f0; transition: 0.2s;
+}
+.dropdown-content a:hover { background-color: #f8f9fa; color: #27ae60; }
+.dropdown-content a:last-child { border-bottom: none; }
+
+/* 🛠️ 滑鼠移入時顯示選單 */
+.toolbox-dropdown:hover .dropdown-content { display: block; }
+
+/* 手機版適應 */
+@media (max-width: 768px) {
+    .toolbox-dropdown { top: 10px; right: 10px; }
+    .toolbox-btn { padding: 8px 15px; font-size: 14px; }
+    .dropdown-content { min-width: 180px; }
+}
 
         /* 🚀 新增：圓形 Aa 懸浮按鈕 */
         .floating-font-btn {
@@ -238,7 +274,13 @@
 <body>
 
     <button id="backBtn" class="fixed-home-btn" onclick="goBackToTOC()">⬅ 返回目錄</button>
-    <a href="vd-calc.html" target="_blank" class="fixed-calc-btn">🧮 壓降計算機</a>
+    <div class="toolbox-dropdown">
+    <button class="toolbox-btn">🛠️ 常用工具 ▾</button>
+    <div class="dropdown-content">
+        <a href="vd-calc.html" target="_blank">🧮 電壓降與線徑計算機</a>
+        <a href="tray-calc.html" target="_blank">📏 梯型電纜架寬度計算機</a>
+        </div>
+</div>
 
     <div class="content-area">
         <div id="tocContainer"></div>
