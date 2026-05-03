@@ -12730,28 +12730,50 @@ if (window.speechSynthesis.onvoiceschanged !== undefined) {
     window.speechSynthesis.onvoiceschanged = loadVoices;
 }
 
-// 2. 朗讀核心功能
-function speakArticle(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // 念新的之前，先停止正在念的
-        
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-TW';
-        utterance.rate = 0.9; // 稍微放慢，聽法規比較清楚
-        
-        // 尋找比較像真人的語音
-        const bestVoice = voices.find(v => v.name.includes('Google 國語 (臺灣)')) ||
-                          voices.find(v => v.name.includes('HsiaoChen')) ||
-                          voices.find(v => v.name.includes('Yating')) ||
-                          voices.find(v => v.lang === 'zh-TW');
-        if (bestVoice) utterance.voice = bestVoice;
-        
-        window.speechSynthesis.speak(utterance);
-    } else {
-        alert("抱歉，您的瀏覽器不支援語音朗讀功能。");
-    }
-}
+// 2. 朗讀核心功能 (升級版：分段朗讀解決中斷與延遲問題)
+window.utterances = []; // 建立全域變數，防止朗讀物件被瀏覽器當作垃圾回收 (Garbage Collection)
 
+function speakArticle(text) {
+    if (!('speechSynthesis' in window)) {
+        alert("抱歉，您的瀏覽器不支援語音朗讀功能。");
+        return;
+    }
+
+    window.speechSynthesis.cancel(); // 念新的之前，先停止正在念的
+    window.utterances = []; // 清空之前的陣列
+
+    // 尋找比較像真人的語音
+    const bestVoice = voices.find(v => v.name.includes('Google 國語 (臺灣)')) ||
+                      voices.find(v => v.name.includes('HsiaoChen')) ||
+                      voices.find(v => v.name.includes('Yating')) ||
+                      voices.find(v => v.lang === 'zh-TW');
+
+    // 將換行符號替換成中文逗號，避免條列式換行導致停頓過久或黏在一起
+    let cleanText = text.replace(/\n+/g, '，');
+
+    // 【關鍵解法】：利用正規表示式，依據句號、分號、驚嘆號等標點符號，將長文章切成短句陣列
+    let chunks = cleanText.match(/[^。；！？]+[。；！？]*/g);
+    
+    // 如果法規裡完全沒有這些標點符號，就直接當作一句
+    if (!chunks) chunks = [cleanText];
+
+    // 利用迴圈將短句依序加入語音佇列
+    chunks.forEach(chunk => {
+        // 避開只剩空白或只有單一標點符號的無效發音
+        if (chunk.trim().length > 1) { 
+            let utterance = new SpeechSynthesisUtterance(chunk.trim());
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.9; // 稍微放慢
+            if (bestVoice) utterance.voice = bestVoice;
+            
+            // 存入全域陣列，強制瀏覽器將其保留在記憶體中
+            window.utterances.push(utterance); 
+            
+            // 丟入語音 API 排隊播放
+            window.speechSynthesis.speak(utterance);
+        }
+    });
+}
 // 3. 事件監聽：當使用者點擊「朗讀按鈕」時執行
 document.addEventListener("click", function(e) {
     // 檢查點擊的是不是我們生成的朗讀按鈕
