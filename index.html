@@ -12680,5 +12680,117 @@ PV  系統連接至其他電源者，應依第九章第三節規定辦理。
     };
 </script>
 
+<button id="speakBtn" class="floating-speak-btn" onclick="speakText()">🔊 朗讀</button>
+
+<style>
+/* 增加朗讀按鈕的樣式，放在原本右下角 Aa 按鈕的上方 */
+.floating-speak-btn {
+    position: fixed;
+    bottom: 85px; /* 放在 Aa 按鈕 (bottom: 25px) 的上方 */
+    right: 25px;
+    width: 50px;
+    height: 50px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 1001;
+    transition: 0.3s;
+    display: flex; /* 預設顯示，如果你想和 Aa 按鈕一樣進內文才顯示，可以先設為 none */
+    align-items: center;
+    justify-content: center;
+}
+.floating-speak-btn:hover {
+    background-color: #3498db;
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .floating-speak-btn {
+        bottom: 70px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 12px;
+    }
+}
+</style>
+
+<script>
+// 1. 預先載入語音庫 (讓聲音比較自然)
+let voices = [];
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+}
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+// 2. 朗讀核心功能
+function speakArticle(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // 念新的之前，先停止正在念的
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-TW';
+        utterance.rate = 0.9; // 稍微放慢，聽法規比較清楚
+        
+        // 尋找比較像真人的語音
+        const bestVoice = voices.find(v => v.name.includes('Google 國語 (臺灣)')) ||
+                          voices.find(v => v.name.includes('HsiaoChen')) ||
+                          voices.find(v => v.name.includes('Yating')) ||
+                          voices.find(v => v.lang === 'zh-TW');
+        if (bestVoice) utterance.voice = bestVoice;
+        
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert("抱歉，您的瀏覽器不支援語音朗讀功能。");
+    }
+}
+
+// 3. 事件監聽：當使用者點擊「朗讀按鈕」時執行
+document.addEventListener("click", function(e) {
+    // 檢查點擊的是不是我們生成的朗讀按鈕
+    if (e.target.classList.contains("auto-read-btn")) {
+        // 往上找到包含這條法規的最外層區塊 (.article-block)
+        let block = e.target.closest(".article-block");
+        if (block) {
+            // 抓取標題 (移除按鈕本身的文字) 與內文
+            let titleEl = block.querySelector(".article-title").cloneNode(true);
+            let btnInTitle = titleEl.querySelector(".auto-read-btn");
+            if (btnInTitle) btnInTitle.remove(); // 把按鈕文字拿掉，以免連按鈕文字都唸出來
+            
+            let titleText = titleEl.innerText.trim();
+            let contentText = block.querySelector(".article-text").innerText.trim();
+            
+            // 將標題與內文組合起來唸出
+            speakArticle(titleText + "。" + contentText);
+        }
+    }
+});
+
+// 4. 自動化：因為你的法條可能是動態生成的，用定時器不斷檢查並在標題旁加入按鈕
+setInterval(() => {
+    document.querySelectorAll(".article-title").forEach(titleEl => {
+        // 如果這個標題還沒有被塞入按鈕，就塞一個進去
+        if (!titleEl.querySelector(".auto-read-btn")) {
+            let btn = document.createElement("button");
+            // 借用你原本寫好的 inline-table-btn 樣式，並加上自訂的 class
+            btn.className = "inline-table-btn auto-read-btn"; 
+            btn.innerHTML = "🔊 朗讀本條";
+            btn.style.marginLeft = "15px";
+            
+            // 把按鈕加到標題的最後面
+            titleEl.appendChild(btn);
+        }
+    });
+}, 1000); // 每秒檢查一次，確保切換章節時新出現的法條也會有按鈕
+</script>
+
+
 </body>
 </html>
